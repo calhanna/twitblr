@@ -1,0 +1,349 @@
+﻿{% extends "./base.html" %}
+{% block head %}
+    {{ super() }}
+    <!-- Local Stylesheet -->
+    <link rel="stylesheet" href="{{url_for('static', filename='dash.css')}}">
+
+    <!-- Authentication Stylesheet -->
+    <link rel="stylesheet" href="{{url_for('static', filename='auth.css')}}">
+{% endblock %}
+
+{% block overlay_content %}
+    <div class="card my-auto mx-auto justify-content-center">
+        <div class="card-title justify-content-center">
+            <h2> Sign In </h2>
+        </div>
+        <div class="card-body justify-content-center d-flex">
+            <form action='{{url_for("auth.login")}}' method="post" id="login" autocomplete="off">
+                <div class="row">
+                    <div class="col-4">
+                        <label for="username">Username</label>
+                    </div>
+                    <div class="col-8">
+                        <input id="login_username" class="text-input" name="username" required> <br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4 pt-2">
+                        <label for="password">Password</label>
+                    </div>
+                    <div class="col-8 pt-2">
+                        <input id="login_password" class="text-input" type="password" name="password" required> <br>
+                    </div>
+                </div>
+                <input class="mx-auto d-flex align-middle" type="submit" value="Let's go!">
+                <div class="flash-container">
+                    <div class="flash"></div>
+                </div>
+            </form>
+        </div>
+    </div>  
+
+    <h5 class="quiet-text"><br>or<br></h5>
+
+    <div class="card mx-auto my-auto justify-content-center">
+
+        <div class="card-title justify-content-center">
+            <h2> Register </h2>
+        </div>
+
+        <div class="card-body justify-content-center d-flex">
+
+            <form method="post" action="{{ url_for('auth.register') }}" autocomplete="off">
+
+                <div class="row">
+                    <div class="col-4">
+                        <label for="email">Email</label>
+                    </div>
+                    <div class="col-8">
+                        <input class="text-input" oninput="Validate_Email()" onfocus="Show_Feedback('email')" onfocusout="Hide_Feedback('email')" name="email" id="email" required> <br>
+                    </div>
+                </div>
+                <p class="feedback-message feedback-hidden" id="email-feedback" >Please enter a valid email address</p>
+
+                <div class="row">
+
+                    <div class="col-4 pt-2">
+                        <label for="username">Username</label>
+                    </div>
+                    <div class="col-8 pt-2">
+                        <input class="text-input" oninput="Validate_Username()" onfocus="Show_Feedback('username'); Validate_Username()" onfocusout="Hide_Feedback('username')" name="username" id="username" required> <br>
+                    </div>
+                </div>
+                <p class="feedback-message feedback-hidden" ontransitionend="console.log('woo!')" id="username-feedback" >Username already taken</p>
+
+                <div class="row">
+                    <div class="col-4 pt-2">
+                        <label for="password">Password</label>
+                    </div>
+                    <div class="col-8 pt-2">
+                        <input type="password" class="text-input password" oninput="Validate_Password()" onfocus="Show_Feedback('password'); Validate_Password()" onfocusout="Hide_Feedback('password')" name="password" id="password" required> <br>
+                    </div>
+                </div>
+                <p class="feedback-message feedback-hidden" id="password-feedback" >
+                    Password must be least <span class="feedback-message password-feedback">8 characters</span>, including at least <span class="feedback-message password-feedback">one capital letter</span>, and <span class="feedback-message password-feedback">one number</span>
+                </p>
+
+                <input class="mx-auto d-flex align-middle" type="submit" value="Let's go!">
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block display_title %}Dashboard{% endblock %}
+
+{% block nav_content %}
+    {% if g.user != None %}
+        <div class="prof-card mx-auto justify-content-center">
+            <div class="pfp-container">
+                <img src="{{url_for('static', filename=g.user[4].strip('.'))}}" class="pfp-lg card-image-top"/>
+            </div>
+            <br>
+            <h5 class="card-title">{{g.user[1]}}</h5>
+            <a href="{{url_for('profile')}}" class="btn btn-primary">Profile</a>
+            <a href="{{url_for('auth.sign_out')}}" class="btn min-button"><i class="fa fa-sign-out"></i></a>
+        </div>
+    {% else %}
+        <button class="nav-button login-button" onclick="Display_Overlay()"> Sign In </button>
+    {% endif %}
+    <div class="side-nav">
+    <!-- Navigation Buttons -->
+    <a class="nav-button" href="{{url_for('create_post', reply_id=0)}}">Create Post</a>
+    </div>
+{% endblock %}
+
+{% block main_content %}
+    <div class="posts">
+        {% for post in posts %}
+            <div class="row">
+                <div class="col-lg-12 p-2 d-flex">
+                    <div class="card mx-auto">
+                        <div class="card-body">
+                            <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=post[-5].strip('.'))}}" />        {{ post[1] }}</h5>
+                            <div>
+                                <p class="card-text">{{ post[4] |safe}}</p>
+                            </div>
+                            <a 
+                                href="{{url_for('create_post', reply_id=post[0])}}" 
+                                class="action-link {{post[0]}}"
+                            >
+                                <i class="fa fa-reply" aria-hidden="true"></i>
+                            </a>
+                            <a 
+                                href="#" 
+                                class="action-link {{post[0]}} like-button"
+                            >
+                                <i class="fa fa-thumbs-up {{post[-2]}}" aria-hidden="true"></i>  {{post[-4]}}
+                            </a> 
+                            <a 
+                                href="#"
+                                class="action-link {{post[0]}} dislike-button"
+                            >
+                                <i class="fa fa-thumbs-down {{post[-2]}}" aria-hidden="true"></i>  {{post[-3]}}
+                            </a>
+
+                            {% if post[-1]|length > 0 %}
+                            <button onclick="Show_Replies({{post[0]}})">Show {{ post[-1]|length }} Replies </button>
+                            {% endif %}
+
+                            {% if g.user[5] == '1' %}
+                                <a 
+                                    href="{{url_for('delete_post', post_id=post[0])}}"
+                                    class="action-link"
+                                >
+                                    <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="reply-container minimised" id="replies-{{post[0]}}">
+                <!-- Display each reply to each post -->
+                {% for reply in post[-1]%}
+
+                    <div class="row">
+                        <div class="col-12 reply-col">
+
+                            <div class="card">
+
+                                <div class="card-body">
+                                    <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=reply[-4].strip('.'))}}" />        {{ reply[1] }}</h5>
+                                    
+                                    <div>
+                                        <p class="card-text">{{ reply[4] |safe}}</p>
+                                    </div>
+                                    
+                                    <!-- Reply Button-->
+                                    <a href="{{url_for('create_post', reply_id=reply[0])}}" class="action-link {{reply[0]}}">
+                                        <i class="fa fa-reply" aria-hidden="true"></i>
+                                    </a>
+                                    
+                                    <!-- Like button. Requires a lot of post information -->
+                                    <a href="{{url_for('add_likes', args=[reply[0], False])}}" onclick="AddLikes({{reply[0]}}, {{reply[-3]}}, {{reply[-2]}}, 0)" class="action-link {{reply[0]}}">
+                                        <i class="fa fa-thumbs-up {{reply[-1]}}" aria-hidden="true"></i>  {{reply[-3]}}
+                                    </a> 
+
+                                    <a href="{{url_for('add_likes', args=[reply[0], True])}}" onclick="AddLikes({{reply[0]}}, {{reply[-3]}}, {{reply[-2]}}, 1)" class="action-link {{reply[0]}}">
+                                        <i class="fa fa-thumbs-down {{reply[-1]}}" aria-hidden="true"></i>  {{reply[-2]}}
+                                    </a>
+
+                                    {% if g.user[5] == '1' %}
+                                        <a href="{{url_for('delete_post', post_id=reply[0])}}" class="action-link">
+                                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                        </a>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{super()}}
+    <script>
+    function Validate_Email() 
+    {
+        // JS validation function for the email field. Could have done this in python, but I wouldnt be able to update in real time as easily.
+        var mail = document.getElementById("email");
+        var feedback = document.getElementById("email-feedback")
+        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail.value))   // RegEX check
+        {
+            feedback.style.color = "green";     // Faster than making a class, and then toggling the class, whatever
+            feedback.innerHTML = "Email address is valid";
+        } else {
+            feedback.style.color = "red";
+            feedback.innerHTML = "Please enter a valid email address";
+        }
+    }
+
+    function Validate_Username() {
+        // Check username against list of used names, provided through Jinja. Also make sure there is a username
+
+        var username_list = eval('{{username_list|tojson}}');
+        var username = document.getElementById('username')
+        var feedback = document.getElementById("username-feedback")
+        
+        if (username.value.length == 0) {
+            feedback.style.color = "red";
+            feedback.innerHTML = "Please fill out this field"
+        } else {
+            if (username_list.includes(username.value)) {
+                feedback.style.color = "red";
+                feedback.innerHTML = "Username already taken";
+            } else {
+                feedback.style.color = "green";
+                feedback.innerHTML = "Username is unique";
+            }
+        }
+    }
+
+    function Validate_Password() {
+        // Validates each individual criteria
+
+        var feedback_elements = document.getElementsByClassName("password-feedback");
+        var password = document.getElementById("password")
+        
+        // Validate length
+        if (password.value.length >= 8) {
+            feedback_elements[0].style.color = "green"
+        } else {
+            feedback_elements[0].style.color = "red"
+        }
+
+        // Validate capitals
+        if (/[A-Z]/.test(password.value)) {
+            feedback_elements[1].style.color = "green"
+        } else {
+            feedback_elements[1].style.color = "red"
+        }
+
+        // Validate number
+        if (/\d/.test(password.value)) {
+            feedback_elements[2].style.color = "green"
+        } else {
+            feedback_elements[2].style.color = "red"
+        }
+    }
+
+    function Show_Feedback(feedback_id) {
+        var feedback = document.getElementById(feedback_id + '-feedback');
+        feedback.classList.remove('feedback-hidden')
+    }
+
+    function Hide_Feedback(feedback_id) {
+        var feedback = document.getElementById(feedback_id + '-feedback');
+        feedback.classList.add('feedback-hidden')
+    }
+
+    $(document).ready(function() {
+
+        // Authentication JS
+        $('#login').on('submit',function(e){
+            var flash = document.getElementsByClassName("flash")[0]; // Can't do this properly because get_flashed_messages() refreshes only on page reload, so we make fake flash messages with js
+            flash.innerHTML = ""; // Clear flash messages. 
+            $.ajax(
+                {    // AJAX call
+                    data : {
+                        username : $('#login_username').val(),
+                        password : $('#login_password').val(),
+                    },
+                    type : 'POST',
+                    url : '{{ url_for("auth.login")}}'
+                }
+            )
+            .done(
+                function(data){
+                    // AJAX call returns a data.redirect value if the sign in was successful, or a data.error value if the sign in was unsuccessful
+                    if (data.redirect != "") {
+                        window.location.href=data.redirect;
+                    } else if (data.error != "") {
+                        flash.innerHTML = data.error;
+                    }
+                }
+            );
+            e.preventDefault(); // Block refresh
+        }
+        );
+
+        // Updating post likes
+        $('.like-button, .dislike-button').on('click', function(e){
+            var button = this;
+            if (button.classList.contains('dislike-button')) {
+                var action = "Dislike";
+            } else {
+                var action = "Like";
+            }
+            $.ajax(
+                {
+                    data: {
+                        post_id : this.classList[1],
+                        like: action,
+                    },
+                    type : 'POST',
+                    url : '{{ url_for("add_likes")}}'
+                }
+            )
+            .done(
+                function(data){
+                    if (data.success) {
+                        var buttons = document.getElementsByClassName(button.classList[1]);
+                        buttons[1].innerHTML = "<i class='fa fa-thumbs-up'' aria-hidden='true'></i>  " + data.like_count;
+                        buttons[2].innerHTML = "<i class='fa fa-thumbs-down'' aria-hidden='true'></i>  " + data.dislike_count;
+                    } else {
+                        document.getElementById('auth-overlay').classList.toggle('hidden');
+                    }
+                }
+            )
+            e.preventDefault();
+        });
+    });
+    </script>
+{% endblock %}
+</html>

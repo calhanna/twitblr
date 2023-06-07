@@ -1,0 +1,123 @@
+.overlay body {
+    overflow:hidden;
+}
+
+.overlay .quiet-text {
+    color:white;
+}
+
+.overlay .floating-button {
+    left: calc(50% + 190px);
+    top: 14%;
+}
+
+.floating-button .fa-times {
+    color:white;
+}
+
+.overlay .feedback-message {
+    margin-bottom:0px;
+    transition:0.5s;
+    overflow:hidden;
+    max-height:50px;
+    color: red;
+}
+
+.overlay .password {
+    -webkit-text-security: disc;
+}
+
+.overlay #password-feedback {
+    color:black;
+}
+
+.overlay .feedback-hidden {
+    max-height:0px;
+    transition:0.5s;
+}
+
+.overlay .card {
+    border-radius: 20px;
+    max-width: 380px;
+    /* max-height: 300px; */
+    margin-bottom: 0px !important;
+}
+
+.overlay .break {
+    flex-basis: 100%;
+    height: 0;
+}
+
+.overlay input[type=submit] {
+    border-radius: 5px;
+    border: transparent;
+    padding: 6px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    box-sizing: border-box;
+    font-weight: bold;
+    background:transparent;
+}
+
+.overlay input[type=submit]:hover {
+    background-image:url('../static/assets/backgrounds/rainbow-text-no-black.jpg');
+    background-size:cover;
+    -webkit-background-clip:text;
+    color:transparent;
+    animation: rainbow-text;
+    animation-duration:3s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+.overlay input.text-input {
+    border-color: #ccc;
+    border-radius: 3px;
+    border-style:solid;
+    width: 100%;
+    margin: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;   
+}
+
+.overlay .card-title {
+    text-align: center;
+    padding-top:1em;
+}
+
+.overlay .flash {
+    color:red;
+}
+
+@keyframes rainbow-text {
+    0% {
+        background-position-x:0px
+    }
+
+    100% {
+        background-position-x: -1200px;
+    }
+}
+
+@media(max-width:500px){
+    .overlay .floating-button {
+        right:0;
+        top:14%;
+        left:auto;
+    }
+}
+
+@media(max-height:668px){
+    .overlay {
+        padding-top:5vw;
+    }
+}
+
+@media(max-height:701px) {
+    .overlay .floating-button {
+        top:0 !important;
+    }
+}

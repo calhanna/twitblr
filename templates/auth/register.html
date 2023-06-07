@@ -1,0 +1,177 @@
+﻿<!DOCTYPE html>
+
+<html class="h-100" lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title></title>
+
+    <!-- Latest compiled and minified Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Latest compiled Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- Global Stylesheet -->
+    <link rel="stylesheet" href="{{url_for('static', filename='../static/global.css')}}">
+
+    <!-- Local Stylesheet -->
+    <link rel="stylesheet" href="{{url_for('static', filename='../static/auth.css')}}">
+
+</head>
+<body class="h-100">
+    <div class="container h-100 pt-2 d-flex align-middle justify-content-center">
+
+        <div class="row d-flex align-middle">
+
+            <!-- This is not how you're supposed to use these classes but it works and makes this weird page look normal on desktop and mobile -->
+
+            <div class="col-12 justify-content-center p-2 d-flex align-middle">
+
+                <div class="card my-auto justify-content-center d-flex align-middle">
+
+                    <div class="card-title justify-content-center">
+                        <h2> Register </h2>
+                    </div>
+
+                    <div class="card-body justify-content-center d-flex">
+
+                        <form method="post">
+
+                            <div class="row">
+                                <div class="col-4">
+                                    <label for="email">Email</label>
+                                </div>
+                                <div class="col-8">
+                                    <input class="text-input" oninput="ValidateEmail()" onfocus="ShowFeedback('email')" onfocusout="HideFeedback('email')" name="email" id="email" required> <br>
+                                </div>
+                            </div>
+                            <p class="feedback-message feedback-hidden" id="email-feedback" >Please enter a valid email address</p>
+
+                            <div class="row">
+
+                                <div class="col-4 pt-2">
+                                    <label for="username">Username</label>
+                                </div>
+                                <div class="col-8 pt-2">
+                                    <input class="text-input" oninput="ValidateUsername()" onfocus="ShowFeedback('username'); ValidateUsername()" onfocusout="HideFeedback('username')" name="username" id="username" required> <br>
+                                </div>
+                            </div>
+                            <p class="feedback-message feedback-hidden" id="username-feedback" >Username already taken</p>
+
+                            <div class="row">
+                                <div class="col-4 pt-2">
+                                    <label for="password">Password</label>
+                                </div>
+                                <div class="col-8 pt-2">
+                                    <!-- It's important that this is NOT the built-in html password type, as chrome auto detects this and adds a popup that breaks when the password field moves -->
+                                    <input class="text-input password" oninput="ValidatePassword()" onfocus="ShowFeedback('password'); ValidatePassword()" onfocusout="HideFeedback('password')" name="password" id="password" required> <br>
+                                </div>
+                            </div>
+                            <p class="feedback-message feedback-hidden" id="password-feedback" >
+                                Password must be least <span class="feedback-message password-feedback">8 characters</span>, including at least <span class="feedback-message password-feedback">one capital letter</span>, and <span class="feedback-message password-feedback">one number</span>
+                            </p>
+
+                            <input class="mx-auto d-flex align-middle" type="submit" value="Let's go!">
+                        </form>
+                    </div>
+                </div>
+
+            </div> 
+
+            <div class="col-12 justify-content-center d-flex">
+                <h6 class="quiet-text">Already with us? <br> <a href="{{url_for('auth.login')}}" class="stylish-link">log in</a></h6>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+    // All the JS for this page goes here
+
+    function ValidateEmail() 
+    {
+        // JS validation function for the email field. Could have done this in python, but I wouldnt be able to update in real time as easily.
+        var mail = document.getElementById("email");
+        var feedback = document.getElementById("email-feedback")
+        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail.value))   // RegEX check
+        {
+            feedback.style.color = "green";     // Faster than making a class, and then toggling the class, whatever
+            feedback.innerHTML = "Email address is valid";
+        } else {
+            feedback.style.color = "red";
+            feedback.innerHTML = "Please enter a valid email address";
+        }
+    }
+
+    function ValidateUsername() {
+        // Check username against list of used names, provided through Jinja. Also make sure there is a username
+
+        var username_list = eval('{{username_list|tojson}}');
+        var username = document.getElementById('username')
+        var feedback = document.getElementById("username-feedback")
+        
+        if (username.value.length == 0) {
+            feedback.style.color = "red";
+            feedback.innerHTML = "Please fill out this field"
+        } else {
+            if (username_list.includes(username.value)) {
+                feedback.style.color = "red";
+                feedback.innerHTML = "Username already taken";
+            } else {
+                feedback.style.color = "green";
+                feedback.innerHTML = "Username is unique";
+            }
+        }
+    }
+
+    function ValidatePassword() {
+        // Validates each individual criteria
+
+        var feedback_elements = document.getElementsByClassName("password-feedback");
+        var password = document.getElementById("password")
+        
+        // Validate length
+        if (password.value.length >= 8) {
+            feedback_elements[0].style.color = "green"
+        } else {
+            feedback_elements[0].style.color = "red"
+        }
+
+        // Validate capitals
+        if (/[A-Z]/.test(password.value)) {
+            feedback_elements[1].style.color = "green"
+        } else {
+            feedback_elements[1].style.color = "red"
+        }
+
+        // Validate number
+        if (/\d/.test(password.value)) {
+            feedback_elements[2].style.color = "green"
+        } else {
+            feedback_elements[2].style.color = "red"
+        }
+    }
+
+    function ShowFeedback(feedback_id) {
+        var feedback = document.getElementById(feedback_id + '-feedback');
+        feedback.classList.remove('feedback-hidden')
+    }
+
+    function HideFeedback(feedback_id) {
+        var feedback = document.getElementById(feedback_id + '-feedback');
+        feedback.classList.add('feedback-hidden')
+    }
+
+</script>
+
+
+</html>

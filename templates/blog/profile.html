@@ -1,0 +1,191 @@
+﻿{% extends "./base.html" %}
+{% block head%}
+    {{ super() }}
+    <!-- Local Stylesheet -->
+    <link rel="stylesheet" href="{{url_for('static', filename='profile.css')}}">
+{% endblock %}
+
+{% block display_title %}Profile{% endblock %}
+
+{% block nav_content %}
+    {% if g.user != None %}
+        <div class="prof-card mx-auto justify-content-center">
+            <div class="pfp-container">
+                <img src="{{url_for('static', filename=g.user[4].strip('.'))}}" class="pfp-lg card-image-top"/>
+            </div>
+            <br>
+            <h5 class="card-title">{{g.user[1]}}</h5>
+            <a href="{{url_for('profile')}}" class="btn btn-primary">Profile</a>
+            <a href="{{url_for('auth.sign_out')}}" class="btn min-button"><i class="fa fa-sign-out"></i></a>
+        </div>
+    {% else %}
+        <button class="nav-button login-button" onclick="Display_Overlay()"> Sign In </button>
+    {% endif %}
+    <div class="side-nav">
+    <!-- Navigation Buttons -->
+    <a class="nav-button" href="#" onclick="Show_Post_Creator()">Create Post</a>
+    <br>
+    <a class="nav-button" href="{{url_for('dashboard')}}">Dashboard</a>
+    </div>
+{% endblock %}
+
+{% block main_content %}
+    <div class="create-post hidden">
+        <div class="row">
+            <div class="col-lg-12 p-2 d-flex">
+                <div class="card mx-auto">
+                    <div class="card-body">
+                        <form class="post-body" id="post-creation-form" method="POST">
+                            <textarea oninput='ValidatePost()' id="post-body" name="post-body" required></textarea>
+                            <input class="mx-auto d-flex align-middle" id="post-submit" type="submit" value="Create Post">
+                        </form>
+                        <p id="counter" style="color:green">0/255</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="posts">
+        {% for post in posts %}
+            <div class="row">
+                <div class="col-lg-12 p-2 d-flex">
+                    <div class="card mx-auto">
+                        <div class="card-body">
+                            <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=post[-5].strip('.'))}}" />        {{ post[1] }}</h5>
+                            <div>
+                                <p class="card-text">{{ post[4] |safe}}</p>
+                            </div>
+                            <a 
+                                href="{{url_for('create_post', reply_id=post[0])}}" 
+                                class="action-link {{post[0]}}"
+                            >
+                                <i class="fa fa-reply" aria-hidden="true"></i>
+                            </a>
+                            <a 
+                                href="#" 
+                                class="action-link {{post[0]}} like-button"
+                            >
+                                <i class="fa fa-thumbs-up {{post[-2]}}" aria-hidden="true"></i>  {{post[-4]}}
+                            </a> 
+                            <a 
+                                href="#"
+                                class="action-link {{post[0]}} dislike-button"
+                            >
+                                <i class="fa fa-thumbs-down {{post[-2]}}" aria-hidden="true"></i>  {{post[-3]}}
+                            </a>
+
+                            {% if post[-1]|length > 0 %}
+                            <button onclick="Show_Replies({{post[0]}})">Show {{ post[-1]|length }} Replies </button>
+                            {% endif %}
+
+                            {% if g.user[5] == '1' %}
+                                <a 
+                                    href="{{url_for('delete_post', post_id=post[0])}}"
+                                    class="action-link"
+                                >
+                                    <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="reply-container minimised" id="replies-{{post[0]}}">
+                <!-- Display each reply to each post -->
+                {% for reply in post[-1]%}
+
+                    <div class="row">
+                        <div class="col-12 reply-col">
+
+                            <div class="card">
+
+                                <div class="card-body">
+                                    <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=reply[-4].strip('.'))}}" />        {{ reply[1] }}</h5>
+                                    
+                                    <div>
+                                        <p class="card-text">{{ reply[4] |safe}}</p>
+                                    </div>
+                                    
+                                    <!-- Reply Button-->
+                                    <a href="{{url_for('create_post', reply_id=reply[0])}}" class="action-link {{reply[0]}}">
+                                        <i class="fa fa-reply" aria-hidden="true"></i>
+                                    </a>
+                                    
+                                    <!-- Like button. Requires a lot of post information -->
+                                    <a href="{{url_for('add_likes', args=[reply[0], False])}}" onclick="AddLikes({{reply[0]}}, {{reply[-3]}}, {{reply[-2]}}, 0)" class="action-link {{reply[0]}}">
+                                        <i class="fa fa-thumbs-up {{reply[-1]}}" aria-hidden="true"></i>  {{reply[-3]}}
+                                    </a> 
+
+                                    <a href="{{url_for('add_likes', args=[reply[0], True])}}" onclick="AddLikes({{reply[0]}}, {{reply[-3]}}, {{reply[-2]}}, 1)" class="action-link {{reply[0]}}">
+                                        <i class="fa fa-thumbs-down {{reply[-1]}}" aria-hidden="true"></i>  {{reply[-2]}}
+                                    </a>
+
+                                    {% if g.user[5] == '1' %}
+                                        <a href="{{url_for('delete_post', post_id=reply[0])}}" class="action-link">
+                                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                        </a>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+<script>
+    // Post Creation JS
+
+    // Validate 
+    function ValidatePost() {
+        var post_body = document.getElementById('post-body');
+
+        // Expand post body to fit text
+        post_body.style.height = "";
+        post_body.style.height = post_body.scrollHeight + 3 + "px";
+
+        // Check character count, update counter
+        var length = post_body.value.length;
+        document.getElementById('counter').innerHTML = length + '/255';
+        if (length > 255) {
+            counter.style.color = 'red';
+            document.getElementById('post-submit').disabled=true;
+        } else {
+            counter.style.color = 'green';
+            document.getElementById('post-submit').disabled=false;
+        }
+    }
+
+    // Create DB entry with AJAX
+    $(document).ready(function() {
+
+        // Authentication JS
+        $("#post-creation-form").on('submit',function(e){
+            $.ajax(
+                {    // AJAX call
+                    data : {
+                        postContent : $('#post-body').val(),
+                    },
+                    type : 'POST',
+                    url : '{{ url_for("create_post", reply_id=0) }}'
+                }
+            )
+            .done(
+                function(data){
+                    
+                }
+            );
+            e.preventDefault(); // Block refresh
+        }
+        );
+    });
+</script>
+{% endblock %}
+</html>

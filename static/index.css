@@ -1,0 +1,42 @@
+body {
+	min-height: 100% !important;
+	overflow: hidden;
+}
+
+.big-boye {
+	color: black;
+	font-size: 100px;
+	text-align: center;
+}
+
+.main {
+	padding: 10% !important;
+	min-height: 100% !important;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+}
+
+.fa {
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
+.container-fluid {
+	height: 100vw;
+}
+
+.float-center {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.spacer {
+	min-height: 150px;
+}
+
+@font-face {
+	font-family: 'Orbitron';
+	src: url('../assets/Orbitron-VariableFont_wght.ttf');
+}
