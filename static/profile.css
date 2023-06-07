@@ -1,0 +1,12 @@
+.editor-button {
+    background: transparent;
+    border-radius: 5px;
+    border-width: 1px;
+    margin-left: 5px;
+    border-color: gray;
+    box-shadow: 1px 1px #888888;
+}
+
+#first-button {
+    margin-left: 1em;
+}

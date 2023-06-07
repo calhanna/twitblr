@@ -35,11 +35,19 @@
             <div class="col-lg-12 p-2 d-flex">
                 <div class="card mx-auto">
                     <div class="card-body">
-                        <form class="post-body" id="post-creation-form" method="POST">
-                            <textarea oninput='ValidatePost()' id="post-body" name="post-body" required></textarea>
+                        <form class="post-body" id="post-creation-form" method="POST" action="{{url_for('create_post', reply_id=0)}}">
+                            <textarea oninput='ValidatePost()' id="post-body" name="postContent" required></textarea>
                             <input class="mx-auto d-flex align-middle" id="post-submit" type="submit" value="Create Post">
                         </form>
-                        <p id="counter" style="color:green">0/255</p>
+                        <p id="button-tray">
+                            <span id="counter" style="color:green">0/255</span> 
+                            <button class="editor-button" id="first-button" onclick="Test_Func()"> <i class="fa fa-italic"></i> </button>
+                            <button class="editor-button" onclick="Test_Func()"> <i class="fa fa-bold"></i> </button>
+                            <button class="editor-button" onclick="Test_Func()"> <i class="fa fa-underline"></i> </button>
+                            <button class="editor-button" onclick="Test_Func()"> <i class="fa fa-strikethrough"></i> </button>
+                            <button class="editor-button" onclick="Test_Func()"> <i class="fa fa-picture-o"></i> </button>
+                            <button class="editor-button" id="colour-picker" onclick="Test_Func()"> <i class="fa fa-square"></i> </button>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -163,29 +171,21 @@
         }
     }
 
-    // Create DB entry with AJAX
-    $(document).ready(function() {
+    function Test_Func() {
+        console.log('You pressed a button! ')
+    }
 
-        // Authentication JS
-        $("#post-creation-form").on('submit',function(e){
-            $.ajax(
-                {    // AJAX call
-                    data : {
-                        postContent : $('#post-body').val(),
-                    },
-                    type : 'POST',
-                    url : '{{ url_for("create_post", reply_id=0) }}'
-                }
-            )
-            .done(
-                function(data){
-                    
-                }
-            );
-            e.preventDefault(); // Block refresh
-        }
-        );
-    });
+    function getSelectionText() {
+        var text = "";
+        var textEditor = document.getElementById("post-body");
+        text = textEditor.value.slice(textEditor.selectionStart, textEditor.selectionEnd);
+        return text;
+    }
+
+    function createMarkup() {
+        var selected_text = getSelectionText();
+    }
+
 </script>
 {% endblock %}
 </html>

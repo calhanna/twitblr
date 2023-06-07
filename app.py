@@ -263,7 +263,7 @@ def create_post(reply_id):
                 )
             db.commit()
 
-            #return jsonify({'posts': })
+            return redirect(url_for('profile'))
 
         flash(error)
     return render_template('/blog/createPost.html')
