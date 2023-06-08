@@ -41,7 +41,7 @@
                         </form>
                         <p id="button-tray">
                             <span id="counter" style="color:green">0/255</span> 
-                            <button class="editor-button" id="first-button" onclick="Test_Func()"> <i class="fa fa-italic"></i> </button>
+                            <button class="editor-button" id="first-button" onclick="CreateMarkup()"> <i class="fa fa-italic"></i> </button>
                             <button class="editor-button" onclick="Test_Func()"> <i class="fa fa-bold"></i> </button>
                             <button class="editor-button" onclick="Test_Func()"> <i class="fa fa-underline"></i> </button>
                             <button class="editor-button" onclick="Test_Func()"> <i class="fa fa-strikethrough"></i> </button>
@@ -149,7 +149,6 @@
 {{ super() }}
 
 <script>
-    // Post Creation JS
 
     // Validate 
     function ValidatePost() {
@@ -172,19 +171,37 @@
     }
 
     function Test_Func() {
-        console.log('You pressed a button! ')
+        var textEditor = document.getElementById("post-body");
+        console.log(textEditor.selectionStart);
+        console.log(textEditor.selectionEnd)
     }
 
     function getSelectionText() {
         var text = "";
-        var textEditor = document.getElementById("post-body");
+            textEditor = document.getElementById("post-body");
         text = textEditor.value.slice(textEditor.selectionStart, textEditor.selectionEnd);
         return text;
     }
 
-    function createMarkup() {
-        var selected_text = getSelectionText();
+    function CreateMarkup() {
+        var textEditor = document.getElementById("post-body");
+        var text_array = textEditor.value.split('')
+
+        textEditor.focus()
+        console.log(text_array)
+        
+        text_array[textEditor.selectionStart] = '<span>' + text_array[textEditor.selectionStart];
+        text_array[textEditor.selectionEnd-1] = text_array[textEditor.selectionEnd-1] + '</span>';
+        
+        console.log(text_array.join[''])
+        textEditor.value = text_array.join('');
     }
+
+    $(document).ready(function() {
+        $('editor-button').mousedown(function(event) {
+            event.preventDefault();
+        });
+    })
 
 </script>
 {% endblock %}
