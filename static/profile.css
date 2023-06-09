@@ -10,3 +10,12 @@
 #first-button {
     margin-left: 1em;
 }
+
+#counter {
+    float:right;
+}
+
+.create-post {
+    z-index: 100;
+    position:relative;
+}

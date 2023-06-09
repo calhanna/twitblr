@@ -124,14 +124,10 @@ def fetch_post(post, cursor):
             else:
                 dislikes += 1
 
-    # Escape blacklisted html
+    # Escape html
     # Use regex to search for HTML tags, i.e <h1>, <img>, <script>
-    for tag in re.findall(r"<.*>", post[4]):
-        # Check against the HTML blacklist. Blacklist isn't just tags, includes style entries.
-        for bad_tag in HTML_BLACKLIST:
-            if bad_tag in tag.upper():
-                # Replace the offending tag with an escaped version
-                post[4] = post[4].replace(tag, markupsafe.escape(tag))
+    #for tag in re.findall(r"<.*>", post[4]):
+        #post[4] = post[4].replace(tag, markupsafe.escape(tag))
 
     post.extend([likes, dislikes, last_action])
     return post

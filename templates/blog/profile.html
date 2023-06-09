@@ -35,19 +35,35 @@
             <div class="col-lg-12 p-2 d-flex">
                 <div class="card mx-auto">
                     <div class="card-body">
-                        <form class="post-body" id="post-creation-form" method="POST" action="{{url_for('create_post', reply_id=0)}}">
-                            <textarea oninput='ValidatePost()' id="post-body" name="postContent" required></textarea>
-                            <input class="mx-auto d-flex align-middle" id="post-submit" type="submit" value="Create Post">
+                        <form class="post-body" id="post-creation-form" method="POST">
+
+                            <!-- Quill Editor -->
+                            <div oninput='ValidatePost()' id="post-body" name="postContent" required></div>
+                            <div id="toolbar">
+                                <span id="counter" style="color:green">0/255</span> 
+                                <span class="ql-formats">
+                                    <button class="ql-bold"></button>
+                                    <button class="ql-italic"></button>
+                                    <button class="ql-underline"></button>
+                                    <button class="ql-strike"></button>
+                                </span>
+                                <span class="ql-formats">
+                                    <select class="ql-align"></select>
+                                </span>
+                                <span class="ql-format-group">
+                                  <select title="Size" class="ql-size">
+                                    <option value="10px">Small</option>
+                                    <option value="13px">Normal</option>
+                                    <option value="18px">Large</option>
+                                    <option value="32px">Huge</option>
+                                  </select>
+                                </span>
+                                <span class="ql-formats">
+                                    <button class="ql-image"></button>
+                                </span>
+                            </div>
+                            <input class="mx-auto d-flex align-middle" id="post-submit" onclick="SubmitForm()" type="submit" value="Create Post">
                         </form>
-                        <p id="button-tray">
-                            <span id="counter" style="color:green">0/255</span> 
-                            <button class="editor-button" id="first-button" onclick="CreateMarkup()"> <i class="fa fa-italic"></i> </button>
-                            <button class="editor-button" onclick="Test_Func()"> <i class="fa fa-bold"></i> </button>
-                            <button class="editor-button" onclick="Test_Func()"> <i class="fa fa-underline"></i> </button>
-                            <button class="editor-button" onclick="Test_Func()"> <i class="fa fa-strikethrough"></i> </button>
-                            <button class="editor-button" onclick="Test_Func()"> <i class="fa fa-picture-o"></i> </button>
-                            <button class="editor-button" id="colour-picker" onclick="Test_Func()"> <i class="fa fa-square"></i> </button>
-                        </p>
                     </div>
                 </div>
             </div>
@@ -150,6 +166,20 @@
 
 <script>
 
+    // Initialize Quill
+
+    var BackgroundClass = Quill.import('attributors/class/background');
+    var ColorClass = Quill.import('attributors/class/color');
+    var SizeStyle = Quill.import('attributors/style/size');
+    Quill.register(BackgroundClass, true);
+    Quill.register(ColorClass, true);
+    Quill.register(SizeStyle, true);
+
+    var editor = new Quill('#post-body', {
+        modules: { toolbar: '#toolbar' },
+        theme: 'snow',
+    });
+
     // Validate 
     function ValidatePost() {
         var post_body = document.getElementById('post-body');
@@ -159,7 +189,7 @@
         post_body.style.height = post_body.scrollHeight + 3 + "px";
 
         // Check character count, update counter
-        var length = post_body.value.length;
+        var length = post_body.innerText.length;
         document.getElementById('counter').innerHTML = length + '/255';
         if (length > 255) {
             counter.style.color = 'red';
@@ -170,38 +200,12 @@
         }
     }
 
-    function Test_Func() {
-        var textEditor = document.getElementById("post-body");
-        console.log(textEditor.selectionStart);
-        console.log(textEditor.selectionEnd)
+    function SubmitForm() {
+        var textBody = document.getElementById("post-body");
+        var quillHtml = quill.root.innerHTML.trim();
+
+        console.log(quillHtml);
     }
-
-    function getSelectionText() {
-        var text = "";
-            textEditor = document.getElementById("post-body");
-        text = textEditor.value.slice(textEditor.selectionStart, textEditor.selectionEnd);
-        return text;
-    }
-
-    function CreateMarkup() {
-        var textEditor = document.getElementById("post-body");
-        var text_array = textEditor.value.split('')
-
-        textEditor.focus()
-        console.log(text_array)
-        
-        text_array[textEditor.selectionStart] = '<span>' + text_array[textEditor.selectionStart];
-        text_array[textEditor.selectionEnd-1] = text_array[textEditor.selectionEnd-1] + '</span>';
-        
-        console.log(text_array.join[''])
-        textEditor.value = text_array.join('');
-    }
-
-    $(document).ready(function() {
-        $('editor-button').mousedown(function(event) {
-            event.preventDefault();
-        });
-    })
 
 </script>
 {% endblock %}
