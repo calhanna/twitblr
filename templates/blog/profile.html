@@ -171,29 +171,9 @@
         theme: 'snow',
     });
 
-    // Validate 
-    function ValidatePost() {
-        var post_body = document.getElementById('post-body');
-
-        // Expand post body to fit text
-        post_body.style.height = "";
-        post_body.style.height = post_body.scrollHeight + 3 + "px";
-
-        // Check character count, update counter
-        var length = post_body.innerText.length;
-        document.getElementById('counter').innerHTML = length + '/255';
-        if (length > 255) {
-            counter.style.color = 'red';
-            document.getElementById('post-submit').disabled=true;
-        } else {
-            counter.style.color = 'green';
-            document.getElementById('post-submit').disabled=false;
-        }
-    }
-
     $('#post-creation-form').submit(function() {
         let post_body = editor.root.innerHTML;
-        $.post("{{url_for('create_post', reply_id=0)}}", {postContent: post_body}, function(result){
+        $.post("{{url_for('create_post')}}", {post_content: post_body, reply_id: 0}, function(result){
             location.reload();
         })
     })

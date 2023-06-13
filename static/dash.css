@@ -4,3 +4,25 @@
     border-radius: 20px;
     /* padding-top: 2rem;*/
 }
+
+.reply-editor {
+    height: 9rem;
+    padding: 0.5rem;
+    margin-top: 0px;
+    margin-left: 1rem;
+    width: 43.55rem;
+}
+
+#post-submit {
+    top:6.5rem;
+}
+
+.row.p-2 {
+    margin-top:-0.75rem !important;
+    position:relative;
+    z-index:0;
+}
+
+.col-lg-12 {
+    padding-bottom: 0px !important;
+}

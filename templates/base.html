@@ -74,6 +74,16 @@
 
     var reply_editors = {};
 
+    // Preserve scroll position
+    document.addEventListener("DOMContentLoaded", function(event) { 
+        var scrollpos = localStorage.getItem('scrollpos');
+        if (scrollpos) window.scrollTo(0, scrollpos);
+    });
+
+    window.onbeforeunload = function(e) {
+        localStorage.setItem('scrollpos', window.scrollY);
+    };
+
     // Other JS
 
     function Display_Overlay() {
@@ -91,6 +101,58 @@
         post_creator.classList.toggle('hidden');
     }
 
+    // Updating post likes
+    $('.like-button, .dislike-button').on('click', function(e){
+        var button = this;
+        if (button.classList.contains('dislike-button')) {
+            var action = "Dislike";
+        } else {
+            var action = "Like";
+        }
+        $.ajax(
+            {
+                data: {
+                    post_id : this.classList[1],
+                    like: action,
+                },
+                type : 'POST',
+                url : '{{ url_for("add_likes")}}'
+            }
+        )
+        .done(
+            function(data){
+                if (data.success) {
+                    var buttons = document.getElementsByClassName(button.classList[1]);
+                    buttons[1].innerHTML = "<i class='fa fa-thumbs-up'' aria-hidden='true'></i>  " + data.like_count;
+                    buttons[2].innerHTML = "<i class='fa fa-thumbs-down'' aria-hidden='true'></i>  " + data.dislike_count;
+                } else {
+                    document.getElementById('auth-overlay').classList.toggle('hidden');
+                }
+            }
+        )
+        e.preventDefault();
+    });
+
+    // Validate 
+    function ValidatePost() {
+        var post_body = document.getElementById('post-body');
+
+        // Expand post body to fit text
+        post_body.style.height = "";
+        post_body.style.height = post_body.scrollHeight + 3 + "px";
+
+        // Check character count, update counter
+        var length = post_body.innerText.length;
+        document.getElementById('counter').innerHTML = length + '/255';
+        if (length > 255) {
+            counter.style.color = 'red';
+            document.getElementById('post-submit').disabled=true;
+        } else {
+            counter.style.color = 'green';
+            document.getElementById('post-submit').disabled=false;
+        }
+    }
+
     function Show_Reply_Creator(parent){
         // This function needs to create a new quill editor to write a reply and unminimise the reply row
         let post_id = parent.classList[1];
@@ -103,6 +165,16 @@
         });
         reply_editors[post_id] = editor;
     }
+    
+    $('.reply-form').submit(function() {
+        let post_num = $('this').classList[1];
+        let editor = reply_editors[post_num];
+        let post_body = editor.root.innerHTML;
+        let input = prompt();
+        $.post("{{url_for('create_post')}}", {post_content: post_body, reply_id: post_num}, function(result){
+            location.reload();
+        })
+    })
 </script>
 {% endblock %}
 </html>

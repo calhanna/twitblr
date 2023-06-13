@@ -160,9 +160,9 @@
                     </div>
                 </div>
             </div>
-            <div class="row minimised" id="reply-row{{post[0]}}">
-                <div class="card">
-                    <form class="post-body" id="post-creation-form" method="POST">
+            <div class="row minimised p-2" id="reply-row{{post[0]}}">
+                <div class="card reply-editor">
+                    <form class="reply-form {{post[0]}}" method="POST">
                         <!-- Quill Editor -->
                         <div oninput='ValidatePost()' id="post-body{{post[0]}}" name="postContent" required></div>
                         <div id="toolbar{{post[0]}}">
@@ -187,8 +187,8 @@
                             <span class="ql-formats">
                                 <button class="ql-image"></button>
                             </span>
+                            <input class="mx-auto d-flex align-middle" id="post-submit" onclick="SubmitForm()" type="submit" value="Create Post">
                         </div>
-                        <input class="mx-auto d-flex align-middle" id="post-submit" onclick="SubmitForm()" type="submit" value="Create Post">
                     </form>
                 </div>
             </div>
@@ -345,38 +345,6 @@
             e.preventDefault(); // Block refresh
         }
         );
-
-        // Updating post likes
-        $('.like-button, .dislike-button').on('click', function(e){
-            var button = this;
-            if (button.classList.contains('dislike-button')) {
-                var action = "Dislike";
-            } else {
-                var action = "Like";
-            }
-            $.ajax(
-                {
-                    data: {
-                        post_id : this.classList[1],
-                        like: action,
-                    },
-                    type : 'POST',
-                    url : '{{ url_for("add_likes")}}'
-                }
-            )
-            .done(
-                function(data){
-                    if (data.success) {
-                        var buttons = document.getElementsByClassName(button.classList[1]);
-                        buttons[1].innerHTML = "<i class='fa fa-thumbs-up'' aria-hidden='true'></i>  " + data.like_count;
-                        buttons[2].innerHTML = "<i class='fa fa-thumbs-down'' aria-hidden='true'></i>  " + data.dislike_count;
-                    } else {
-                        document.getElementById('auth-overlay').classList.toggle('hidden');
-                    }
-                }
-            )
-            e.preventDefault();
-        });
     });
     </script>
 {% endblock %}

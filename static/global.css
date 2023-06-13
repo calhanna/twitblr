@@ -269,6 +269,8 @@ body {
 	overflow: hidden;
     max-height: 0px !important;
     transition: 0.3s;
+    padding:0px !important;
+    display:none;
 }
 
 body {

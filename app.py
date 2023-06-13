@@ -224,10 +224,13 @@ def add_likes():
             }
         )
 
-@app.route("/create_post/<reply_id>", methods=["GET", "POST"])
-def create_post(reply_id):
+@app.route("/create_post", methods=["GET", "POST"])
+def create_post():
+    print('A POST MIGHT BE BEING MADE')
     if request.method == "POST":
-        content = request.form["postContent"]
+        print('A POST IS BEING MADE')
+        content = request.form["post_content"]
+        reply_id = request.form["reply_id"]
         db = get_db()
 
         # Image handling
