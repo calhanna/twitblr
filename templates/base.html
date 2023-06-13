@@ -62,6 +62,18 @@
 
 {% block scripts %}
 <script type="text/javascript">
+
+    // Initialise Quill
+
+    var BackgroundClass = Quill.import('attributors/class/background');
+    var ColorClass = Quill.import('attributors/class/color');
+    var SizeStyle = Quill.import('attributors/style/size');
+    Quill.register(BackgroundClass, true);
+    Quill.register(ColorClass, true);
+    Quill.register(SizeStyle, true);
+
+    var reply_editors = {};
+
     // Other JS
 
     function Display_Overlay() {
@@ -77,6 +89,19 @@
     function Show_Post_Creator() {
         var post_creator = document.getElementsByClassName("create-post")[0];
         post_creator.classList.toggle('hidden');
+    }
+
+    function Show_Reply_Creator(parent){
+        // This function needs to create a new quill editor to write a reply and unminimise the reply row
+        let post_id = parent.classList[1];
+        let reply_row = document.getElementById('reply-row' + post_id);
+        reply_row.classList.toggle('minimised');
+        // Create quill editor
+        let editor = new Quill('#post-body' + post_id, {
+            modules: { toolbar: '#toolbar'+post_id },
+            theme: 'snow',
+        });
+        reply_editors[post_id] = editor;
     }
 </script>
 {% endblock %}

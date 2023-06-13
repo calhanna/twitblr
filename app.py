@@ -27,20 +27,6 @@ from db import get_db #type: ignore
 
 from PIL import Image
 
-# A blacklist of html tags that users aren't allowed to put in their posts.
-# There are ways around this - they can use encoding, etc, but this is strangely resistant to a lot of common xss attacks
-HTML_BLACKLIST = {
-    "SCRIPT",
-    "ALERT",
-    "FONT-SIZE",
-    "DIV",
-    "!IMPORTANT",
-    "DISPLAY",
-    "ONCLICK",
-    "ON",
-    "JAVASCRIPT"
-}
-
 # App initialisation
 app = Flask(__name__)
 app.config.from_mapping(SECRET_KEY='dev', UPLOAD_FOLDER="./static/userUploads/") # We need a secret key to access the session, and an upload folder to put user profile pictures
@@ -244,12 +230,24 @@ def create_post(reply_id):
         content = request.form["postContent"]
         db = get_db()
 
+        # Image handling
+
+        # CURRENTLY THIS DOES NOTHING.
+        # Right now, we just put straight Base64 data in the database. This is horrible and unsustainable
+        # We will burn through storage space like wildfire
+        # Eventually I will fix this by encoding the base 64 to a file, which i will then link to
+        # but first i need to figure out how to refer to such a file in jinja 
+        
+        # Step 1: Find all <img> tags, and get whats in the middle
+        regex = re.compile(r'<img (.*?)>', re.IGNORECASE | re.MULTILINE)
+        image_srcs = re.findall(regex, content)
+
+        # Step 2: Purge the base64 data
+
         error = None
 
         if not content:
             error = "Post body required"
-        elif len(content) > 255:
-            error = "%s/255 character limit" % len(content)
         else:
             cursor = db.cursor()
             now = datetime.datetime.now()

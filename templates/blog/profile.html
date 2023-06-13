@@ -166,15 +166,6 @@
 
 <script>
 
-    // Initialize Quill
-
-    var BackgroundClass = Quill.import('attributors/class/background');
-    var ColorClass = Quill.import('attributors/class/color');
-    var SizeStyle = Quill.import('attributors/style/size');
-    Quill.register(BackgroundClass, true);
-    Quill.register(ColorClass, true);
-    Quill.register(SizeStyle, true);
-
     var editor = new Quill('#post-body', {
         modules: { toolbar: '#toolbar' },
         theme: 'snow',
@@ -200,12 +191,12 @@
         }
     }
 
-    function SubmitForm() {
-        var textBody = document.getElementById("post-body");
-        var quillHtml = quill.root.innerHTML.trim();
-
-        console.log(quillHtml);
-    }
+    $('#post-creation-form').submit(function() {
+        let post_body = editor.root.innerHTML;
+        $.post("{{url_for('create_post', reply_id=0)}}", {postContent: post_body}, function(result){
+            location.reload();
+        })
+    })
 
 </script>
 {% endblock %}
