@@ -74,7 +74,6 @@ def check_likes(cursor, post):
 def fetch_post(post, cursor):
     """ Fetches all the additional information about a post and formats it into a new list """
 
-    # I meant to do this with a table link thing but I can't remember what they were called and therefore I can't google it
     user_id = post[1]
 
     # Fetch the username using the user_id
@@ -151,11 +150,11 @@ def dashboard():
         if g.user is not None:
             # Fetch all posts excluding those made by the current user.
             cursor.execute(
-                "SELECT * FROM TBLpost WHERE user_id != %s AND reply_id = 0",
+                "SELECT * FROM TBLpost WHERE user_id != %s AND reply_id IS Null",
                 (g.user[0])
                 )
         else:
-            cursor.execute("SELECT * FROM TBLpost WHERE reply_id = 0")
+            cursor.execute("SELECT * FROM TBLpost WHERE reply_id IS NULL")
         
         posts = cursor.fetchall()
 
@@ -202,8 +201,12 @@ def add_likes():
                 # Create entry
                 sql = "INSERT INTO TBLactions (post_id, user_id, type) VALUES (%s, %s, '" + action + "')"
             else:
-                # Update entry
-                sql = "UPDATE TBLactions SET `type`='"+ action +"' WHERE post_id = %s and user_id = %s" 
+                if results[0][3] == action:
+                    # Delete entry
+                    sql = "DELETE FROM TBLactions WHERE post_id = %s and user_id = %s"
+                else:
+                    # Update entry
+                    sql = "UPDATE TBLactions SET `type`='"+ action +"' WHERE post_id = %s and user_id = %s" 
 
             cursor.execute(
                 sql,
@@ -256,7 +259,7 @@ def create_post():
             now = datetime.datetime.now()
             cursor.execute(
                 " INSERT INTO TBLpost (user_id, date, time, content, reply_id) VALUES (%s, %s, %s, %s, %s)",
-                (g.user[0], now.date(), now.time(), content, reply_id)
+                (g.user[0], now.date(), now.time(), content, None)
                 )
             db.commit()
 
