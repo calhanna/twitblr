@@ -234,6 +234,9 @@ def create_post():
         print('A POST IS BEING MADE')
         content = request.form["post_content"]
         reply_id = request.form["reply_id"]
+        print(reply_id)
+        if reply_id == '0': reply_id = None
+
         db = get_db()
 
         # Image handling
@@ -259,7 +262,7 @@ def create_post():
             now = datetime.datetime.now()
             cursor.execute(
                 " INSERT INTO TBLpost (user_id, date, time, content, reply_id) VALUES (%s, %s, %s, %s, %s)",
-                (g.user[0], now.date(), now.time(), content, None)
+                (g.user[0], now.date(), now.time(), content, reply_id)
                 )
             db.commit()
 

@@ -209,7 +209,10 @@
                                     </div>
                                     
                                     <!-- Reply Button-->
-                                    <a href="{{url_for('create_post', reply_id=reply[0])}}" class="action-link {{reply[0]}}">
+                                    <a 
+                                        onclick="Show_Reply_Creator(this)"
+                                        class="action-link {{reply[0]}}"
+                                    >
                                         <i class="fa fa-reply" aria-hidden="true"></i>
                                     </a>
                                     
@@ -231,6 +234,38 @@
                                 </div>
                             </div>
 
+                        </div>
+                    </div>
+                    <div class="row minimised p-2" id="reply-row{{reply[0]}}">
+                        <div class="card reply-editor">
+                            <form class="reply-form {{reply[0]}}" method="POST">
+                                <!-- Quill Editor -->
+                                <div oninput='ValidatePost()' id="post-body{{reply[0]}}" name="postContent" required></div>
+                                <div id="toolbar{{reply[0]}}">
+                                    <span id="counter" style="color:green">0/255</span> 
+                                    <span class="ql-formats">
+                                        <button class="ql-bold"></button>
+                                        <button class="ql-italic"></button>
+                                        <button class="ql-underline"></button>
+                                        <button class="ql-strike"></button>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <select class="ql-align"></select>
+                                    </span>
+                                    <span class="ql-format-group">
+                                    <select title="Size" class="ql-size">
+                                        <option value="10px">Small</option>
+                                        <option value="13px">Normal</option>
+                                        <option value="18px">Large</option>
+                                        <option value="32px">Huge</option>
+                                    </select>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-image"></button>
+                                    </span>
+                                    <input class="mx-auto d-flex align-middle" id="post-submit" onclick="SubmitForm()" type="submit" value="Create Post">
+                                </div>
+                            </form>
                         </div>
                     </div>
                 {% endfor %}

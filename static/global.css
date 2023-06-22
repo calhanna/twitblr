@@ -17,6 +17,14 @@ body {
     border:transparent;
 }
 
+.ql-align-center {
+    text-align:center;
+}
+
+.ql-align-right {
+    text-align:right;
+}
+
 .login-button {
     background-color:rgb(85, 172, 238) !important;
     border:transparent;

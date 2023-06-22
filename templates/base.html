@@ -103,34 +103,41 @@
 
     // Updating post likes
     $('.like-button, .dislike-button').on('click', function(e){
-        var button = this;
-        if (button.classList.contains('dislike-button')) {
-            var action = "Dislike";
+        var user = "{{g.user}}"
+
+        if (user == "None") {
+            Display_Overlay();
         } else {
-            var action = "Like";
-        }
-        $.ajax(
-            {
-                data: {
-                    post_id : this.classList[1],
-                    like: action,
-                },
-                type : 'POST',
-                url : '{{ url_for("add_likes")}}'
+
+            var button = this;
+            if (button.classList.contains('dislike-button')) {
+                var action = "Dislike";
+            } else {
+                var action = "Like";
             }
-        )
-        .done(
-            function(data){
-                if (data.success) {
-                    var buttons = document.getElementsByClassName(button.classList[1]);
-                    buttons[1].innerHTML = "<i class='fa fa-thumbs-up'' aria-hidden='true'></i>  " + data.like_count;
-                    buttons[2].innerHTML = "<i class='fa fa-thumbs-down'' aria-hidden='true'></i>  " + data.dislike_count;
-                } else {
-                    document.getElementById('auth-overlay').classList.toggle('hidden');
+            $.ajax(
+                {
+                    data: {
+                        post_id : this.classList[1],
+                        like: action,
+                    },
+                    type : 'POST',
+                    url : '{{ url_for("add_likes")}}'
                 }
-            }
-        )
-        e.preventDefault();
+            )
+            .done(
+                function(data){
+                    if (data.success) {
+                        var buttons = document.getElementsByClassName(button.classList[1]);
+                        buttons[1].innerHTML = "<i class='fa fa-thumbs-up'' aria-hidden='true'></i>  " + data.like_count;
+                        buttons[2].innerHTML = "<i class='fa fa-thumbs-down'' aria-hidden='true'></i>  " + data.dislike_count;
+                    } else {
+                        document.getElementById('auth-overlay').classList.toggle('hidden');
+                    }
+                }
+            )
+            e.preventDefault();
+        }
     });
 
     // Validate 
@@ -154,26 +161,32 @@
     }
 
     function Show_Reply_Creator(parent){
-        // This function needs to create a new quill editor to write a reply and unminimise the reply row
-        let post_id = parent.classList[1];
-        let reply_row = document.getElementById('reply-row' + post_id);
-        reply_row.classList.toggle('minimised');
-        // Create quill editor
-        let editor = new Quill('#post-body' + post_id, {
-            modules: { toolbar: '#toolbar'+post_id },
-            theme: 'snow',
-        });
-        reply_editors[post_id] = editor;
+        var user = "{{g.user}}";
+        if (user == "None") {
+            Display_Overlay();
+        } else {
+            // This function needs to create a new quill editor to write a reply and unminimise the reply row
+            let post_id = parent.classList[1];
+            let reply_row = document.getElementById('reply-row' + post_id);
+            reply_row.classList.toggle('minimised');
+            // Create quill editor
+            let editor = new Quill('#post-body' + post_id, {
+                modules: { toolbar: '#toolbar'+post_id },
+                theme: 'snow',
+            });
+            reply_editors[post_id] = editor;
+        }
     }
     
-    $('.reply-form').submit(function() {
-        let post_num = $('this').classList[1];
+    $('.reply-form').submit(function(e) {
+        let classList = $(this).attr("class")
+        let classArr = classList.split(/\s+/);
+        let post_num = classArr[1];
         let editor = reply_editors[post_num];
         let post_body = editor.root.innerHTML;
-        let input = prompt();
         $.post("{{url_for('create_post')}}", {post_content: post_body, reply_id: post_num}, function(result){
-            location.reload();
-        })
+            console.log(result);
+        });
     })
 </script>
 {% endblock %}
