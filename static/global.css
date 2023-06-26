@@ -25,6 +25,10 @@ body {
     text-align:right;
 }
 
+.activated {
+    color: #0d6efd !important;
+}
+
 .login-button {
     background-color:rgb(85, 172, 238) !important;
     border:transparent;
@@ -214,9 +218,13 @@ body {
 }
 
 .action-link {
-	color:black !important;
+	color:black;
 	padding:10px;
 	text-decoration: none;
+}
+
+a {
+    color: unset;
 }
 
 .Like {

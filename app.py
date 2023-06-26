@@ -178,7 +178,23 @@ def dashboard():
         users = cursor.fetchall()
         username_list = [user[1] for user in users]
 
-    return render_template('/blog/dash.html', posts=posts, username_list = username_list)
+    return render_template('/blog/dash.html', posts=posts, username_list = username_list, activated_posts=check_user_likes())
+
+@app.route('/check_user_likes', methods=["GET"])
+def check_user_likes():
+    sql = "SELECT * FROM TBLactions WHERE user_id = %s"
+
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute(sql, (g.user[0]))
+        results = cursor.fetchall()
+
+    liked_posts = [x[1] for x in results if x[3] == "Like"]
+    disliked_posts = [x[1] for x in results if x[3] == "Dislike"]
+
+    #return jsonify({'liked_posts': liked_posts, 'disliked_posts': disliked_posts})
+
+    return (liked_posts, disliked_posts)
 
 @app.route('/add_like', methods=['POST'])
 def add_likes():
@@ -274,7 +290,7 @@ def create_post():
 @app.route("/delete_post/<post_id>", methods=["GET", "POST"])
 def delete_post(post_id):
     db = get_db()
-
+    
     with db.cursor() as cursor:
         cursor.execute(
             "DELETE FROM TBLpost WHERE post_id = %s",

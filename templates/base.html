@@ -129,15 +129,27 @@
                 function(data){
                     if (data.success) {
                         var buttons = document.getElementsByClassName(button.classList[1]);
-                        buttons[1].innerHTML = "<i class='fa fa-thumbs-up'' aria-hidden='true'></i>  " + data.like_count;
-                        buttons[2].innerHTML = "<i class='fa fa-thumbs-down'' aria-hidden='true'></i>  " + data.dislike_count;
+                        buttons[1].innerHTML = "<i class='fa fa-thumbs-up' aria-hidden='true'></i>  " + data.like_count;
+                        buttons[2].innerHTML = "<i class='fa fa-thumbs-down' aria-hidden='true'></i>  " + data.dislike_count;
+                        if (buttons[1] == button) {
+                            buttons[1].classList.add("activated");
+                        } else {
+                            buttons[1].classList.remove("activated");
+                        }
+                        if (buttons[2] == button) {
+                            buttons[2].classList.add("activated");
+                        } else {
+                            buttons[2].classList.remove("activated");
+                        }
                     } else {
                         document.getElementById('auth-overlay').classList.toggle('hidden');
                     }
+                    //ColouriseButtons();
                 }
             )
             e.preventDefault();
         }
+
     });
 
     // Validate 
@@ -165,6 +177,12 @@
         if (user == "None") {
             Display_Overlay();
         } else {
+            // Minimise all the other editors
+            let all_editors = document.getElementsByClassName("reply-row");
+            for (let i = 0; i < all_editors.length; i++) {
+                all_editors[i].classList.add("minimised");
+            }
+
             // This function needs to create a new quill editor to write a reply and unminimise the reply row
             let post_id = parent.classList[1];
             let reply_row = document.getElementById('reply-row' + post_id);
@@ -187,6 +205,7 @@
         $.post("{{url_for('create_post')}}", {post_content: post_body, reply_id: post_num}, function(result){
             console.log(result);
         });
+        location.reload()
     })
 </script>
 {% endblock %}

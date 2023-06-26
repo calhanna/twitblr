@@ -133,15 +133,15 @@
                             </a>
                             <a 
                                 href="#" 
-                                class="action-link {{post[0]}} like-button"
+                                class="action-link {{post[0]}} like-button {% if post[0] in activated_posts[0]%}activated{% endif %}"
                             >
-                                <i class="fa fa-thumbs-up {{post[-2]}}" aria-hidden="true"></i>  {{post[-4]}}
+                                <i class="fa fa-thumbs-up {{post[0]}}" aria-hidden="true"></i>  {{post[-4]}}
                             </a> 
                             <a 
                                 href="#"
-                                class="action-link {{post[0]}} dislike-button"
+                                class="action-link {{post[0]}} dislike-button {% if post[0] in activated_posts[1]%}activated{% endif %}"
                             >
-                                <i class="fa fa-thumbs-down {{post[-2]}}" aria-hidden="true"></i>  {{post[-3]}}
+                                <i class="fa fa-thumbs-down {{post[0]}}" aria-hidden="true"></i>  {{post[-3]}}
                             </a>
 
                             {% if post[-1]|length > 0 %}
@@ -160,7 +160,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row minimised p-2" id="reply-row{{post[0]}}">
+            <div class="row minimised p-2 reply-row" id="reply-row{{post[0]}}">
                 <div class="card reply-editor">
                     <form class="reply-form {{post[0]}}" method="POST">
                         <!-- Quill Editor -->
@@ -236,7 +236,7 @@
 
                         </div>
                     </div>
-                    <div class="row minimised p-2" id="reply-row{{reply[0]}}">
+                    <div class="row minimised p-2 reply-row" id="reply-row{{reply[0]}}">
                         <div class="card reply-editor">
                             <form class="reply-form {{reply[0]}}" method="POST">
                                 <!-- Quill Editor -->
