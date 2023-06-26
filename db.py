@@ -42,21 +42,11 @@ class DummyConnection():
         pass
 
     def cursor(self):
-        return DummyCursor()
+        return False
+
+    def __enter__(self):
+        return self
 
     def commit(self):
         print("Dummy connection. Cannot commit to database")
         pass
-
-class DummyCursor():
-    def __init__(self):
-        pass
-
-    def execute(self, sql, vars):
-        pass
-
-    def fetchone(self):
-        return []
-
-    def fetchall(self):
-        return {}

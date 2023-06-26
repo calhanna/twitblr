@@ -45,7 +45,16 @@ def index():
     Renders either welcome page or dashboard
     """
 
+    db = get_db()
+    if db.cursor() == False:
+        return render_template('oopsie.html')
+
     return redirect(url_for('dashboard'))
+
+@app.errorhandler(500)
+def page_not_found(e):
+    # note that we set the 404 status explicitly
+    return render_template('oopsie.html'), 500
 
 def check_likes(cursor, post):
     """ 
@@ -182,19 +191,20 @@ def dashboard():
 
 @app.route('/check_user_likes', methods=["GET"])
 def check_user_likes():
-    sql = "SELECT * FROM TBLactions WHERE user_id = %s"
+    if g.user != None:
+        sql = "SELECT * FROM TBLactions WHERE user_id = %s"
 
-    db = get_db()
-    with db.cursor() as cursor:
-        cursor.execute(sql, (g.user[0]))
-        results = cursor.fetchall()
+        db = get_db()
+        with db.cursor() as cursor:
+            cursor.execute(sql, (g.user[0]))
+            results = cursor.fetchall()
 
-    liked_posts = [x[1] for x in results if x[3] == "Like"]
-    disliked_posts = [x[1] for x in results if x[3] == "Dislike"]
+        liked_posts = [x[1] for x in results if x[3] == "Like"]
+        disliked_posts = [x[1] for x in results if x[3] == "Dislike"]
 
-    #return jsonify({'liked_posts': liked_posts, 'disliked_posts': disliked_posts})
+        #return jsonify({'liked_posts': liked_posts, 'disliked_posts': disliked_posts})
 
-    return (liked_posts, disliked_posts)
+        return (liked_posts, disliked_posts)
 
 @app.route('/add_like', methods=['POST'])
 def add_likes():
