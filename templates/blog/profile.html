@@ -1,4 +1,7 @@
 ﻿{% extends "./base.html" %}
+
+{% import "./macros.html" as macros %}
+
 {% block head%}
     {{ super() }}
     <!-- Local Stylesheet -->
@@ -12,6 +15,12 @@
         <div class="prof-card mx-auto justify-content-center">
             <div class="pfp-container">
                 <img src="{{url_for('static', filename=g.user[4].strip('.'))}}" class="pfp-lg card-image-top"/>
+                <div class="change-pfp pfp-lg">
+                    <i class="fa fa-camera fa-4"></i>
+                    <form id="pfp-form" method="POST" enctype="multipart/form-data" action="{{url_for('profile')}}">
+                        <input name="pfp" id="pfp-chooser" type="file"/>
+                    </form>
+                </div>
             </div>
             <br>
             <h5 class="card-title">{{g.user[1]}}</h5>
@@ -35,12 +44,11 @@
             <div class="col-lg-12 p-2 d-flex">
                 <div class="card mx-auto">
                     <div class="card-body">
-                        <form class="post-body" id="post-creation-form" method="POST">
+                        <form class="post-body" id="post-creation-form" method="POST" action="javascript:void(0);">
 
                             <!-- Quill Editor -->
-                            <div oninput='ValidatePost()' id="post-body" name="postContent" required></div>
+                            <div onkeydown='ValidatePost()' id="post-body" name="postContent" required></div>
                             <div id="toolbar">
-                                <span id="counter" style="color:green">0/255</span> 
                                 <span class="ql-formats">
                                     <button class="ql-bold"></button>
                                     <button class="ql-italic"></button>
@@ -61,8 +69,10 @@
                                 <span class="ql-formats">
                                     <button class="ql-image"></button>
                                 </span>
+                                <input id="post-submit" onclick="SubmitForm()" type="submit" value="Create Post">
+                                <span id="counter" style="color:green">0/255</span> 
+                                <span id="flashed-error"></span>
                             </div>
-                            <input class="mx-auto d-flex align-middle" id="post-submit" onclick="SubmitForm()" type="submit" value="Create Post">
                         </form>
                     </div>
                 </div>
@@ -76,85 +86,77 @@
                     <div class="card mx-auto">
                         <div class="card-body">
                             <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=post[-5].strip('.'))}}" />        {{ post[1] }}</h5>
-                            <div>
-                                <p class="card-text">{{ post[4] |safe}}</p>
-                            </div>
-                            <a 
-                                href="{{url_for('create_post', reply_id=post[0])}}" 
-                                class="action-link {{post[0]}}"
-                            >
-                                <i class="fa fa-reply" aria-hidden="true"></i>
-                            </a>
-                            <a 
-                                href="#" 
-                                class="action-link {{post[0]}} like-button"
-                            >
-                                <i class="fa fa-thumbs-up {{post[-2]}}" aria-hidden="true"></i>  {{post[-4]}}
-                            </a> 
-                            <a 
-                                href="#"
-                                class="action-link {{post[0]}} dislike-button"
-                            >
-                                <i class="fa fa-thumbs-down {{post[-2]}}" aria-hidden="true"></i>  {{post[-3]}}
-                            </a>
+                            <div class="post-display">
+                                <div>
+                                    <p class="card-text">{{ post[4] |safe}}</p>
+                                </div>
+                                <a 
+                                    onclick="Show_Reply_Creator(this)"
+                                    class="action-link {{post[0]}}"
+                                >
+                                    <i class="fa fa-reply" aria-hidden="true"></i>
+                                </a>
+                                <a 
+                                    href="#" 
+                                    class="action-link {{post[0]}} like-button {% if post[0] in activated_posts[0]%}activated{% endif %}"
+                                >
+                                    <i class="fa fa-thumbs-up {{post[0]}}" aria-hidden="true"></i>  {{post[-4]}}
+                                </a> 
+                                <a 
+                                    href="#"
+                                    class="action-link {{post[0]}} dislike-button {% if post[0] in activated_posts[1]%}activated{% endif %}"
+                                >
+                                    <i class="fa fa-thumbs-down {{post[0]}}" aria-hidden="true"></i>  {{post[-3]}}
+                                </a>
 
-                            {% if post[-1]|length > 0 %}
-                            <button onclick="Show_Replies({{post[0]}})">Show {{ post[-1]|length }} Replies </button>
-                            {% endif %}
+                                {% if post[-1]|length > 0 %}
+                                <button onclick="Show_Replies({{post[0]}})">Show {{ post[-1]|length }} Replies </button>
+                                {% endif %}
 
-                            {% if g.user[5] == '1' %}
                                 <a 
                                     href="{{url_for('delete_post', post_id=post[0])}}"
                                     class="action-link"
                                 >
                                     <i class="fa fa-trash-o" aria-hidden="true"></i>
                                 </a>
-                            {% endif %}
+
+                                <a 
+                                    href="#"
+                                    class="action-link {{post[0]}} edit-button"
+                                >
+                                    <i class="fa fa-edit" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                            <div class="post-editor hidden">
+                                <form class="{{post[0]}}" method="POST" action="javascript:void(0);">
+                                    <!-- Quill Editor -->
+                                    <div oninput="ValidatePost()" id="post-body{{post[0]}}" name="postContent" required></div>
+                                    <div id="toolbar{{post[0]}}">
+                                        <span id="counter" style="color:green">0/255</span> 
+                                        <span class="ql-formats">
+                                            <button class="ql-bold"></button>
+                                            <button class="ql-italic"></button>
+                                            <button class="ql-underline"></button>
+                                            <button class="ql-strike"></button>
+                                        </span>
+                                        <span class="ql-formats">
+                                            <select class="ql-align"></select>
+                                        </span>
+                                        <input id="post-submit{{post[0]}}" class="{{post[0]}}" onclick="SubmitEdits(this)" type="submit" value="Create Post">
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            {{ macros.reply_editor(post) }}
             <div class="reply-container minimised" id="replies-{{post[0]}}">
                 <!-- Display each reply to each post -->
                 {% for reply in post[-1]%}
 
-                    <div class="row">
-                        <div class="col-12 reply-col">
+                    {{ macros.display_reply(reply, activated_posts) }}
 
-                            <div class="card">
-
-                                <div class="card-body">
-                                    <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=reply[-4].strip('.'))}}" />        {{ reply[1] }}</h5>
-                                    
-                                    <div>
-                                        <p class="card-text">{{ reply[4] |safe}}</p>
-                                    </div>
-                                    
-                                    <!-- Reply Button-->
-                                    <a href="{{url_for('create_post', reply_id=reply[0])}}" class="action-link {{reply[0]}}">
-                                        <i class="fa fa-reply" aria-hidden="true"></i>
-                                    </a>
-                                    
-                                    <!-- Like button. Requires a lot of post information -->
-                                    <a href="{{url_for('add_likes', args=[reply[0], False])}}" onclick="AddLikes({{reply[0]}}, {{reply[-3]}}, {{reply[-2]}}, 0)" class="action-link {{reply[0]}}">
-                                        <i class="fa fa-thumbs-up {{reply[-1]}}" aria-hidden="true"></i>  {{reply[-3]}}
-                                    </a> 
-
-                                    <a href="{{url_for('add_likes', args=[reply[0], True])}}" onclick="AddLikes({{reply[0]}}, {{reply[-3]}}, {{reply[-2]}}, 1)" class="action-link {{reply[0]}}">
-                                        <i class="fa fa-thumbs-down {{reply[-1]}}" aria-hidden="true"></i>  {{reply[-2]}}
-                                    </a>
-
-                                    {% if g.user[5] == '1' %}
-                                        <a href="{{url_for('delete_post', post_id=reply[0])}}" class="action-link">
-                                            <i class="fa fa-trash-o" aria-hidden="true"></i>
-                                        </a>
-                                    {% endif %}
-
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
                 {% endfor %}
             </div>
         {% endfor %}
@@ -171,12 +173,115 @@
         theme: 'snow',
     });
 
-    $('#post-creation-form').submit(function() {
+    var post_editors = {}
+
+    $('#post-creation-form').submit(function(e) {
         let post_body = editor.root.innerHTML;
-        $.post("{{url_for('create_post')}}", {post_content: post_body, reply_id: 0}, function(result){
-            location.reload();
-        })
+        let pure_text = editor.root.innerText;
+
+        if (pure_text.length > 0) {
+            $.ajax(
+                {
+                    data:{post_content: post_body, reply_id: 0, stripped_content: pure_text},
+                    type: 'POST',
+                    url:"{{url_for('create_post')}}"
+                }
+            )
+            .done(
+                function(result){
+                    if (result.error == null) {
+                        location.reload();
+                    } else {
+                        document.getElementById('flashed-error').innerHTML = result.error;
+                    }
+                }
+            )
+        } else {
+            e.preventDefault()
+            console.log('post creation blocked')
+        }
+    });
+
+    $(document).ready(function() {
+        $('#pfp-chooser').on('change', function() {
+            document.getElementById('pfp-form').submit();
+            /*
+            var pfp_data = new FormData();
+            var pfp_chooser = document.getElementById('pfp-chooser');
+            pfp_data.append('pfp', pfp_chooser.files[0]);
+
+            $.ajax({
+                url: '{{url_for("profile")}}',
+                type: 'POST',
+                processData: false, // important
+                contentType: false, // important
+                dataType : 'json',
+                data: pfp_data
+            })
+            .done( function(data) {
+                if (data.success) {
+                    window.location.href = window.location.href;
+                }
+            }
+            );
+            */
+        });
+    });
+
+    function EditPost(button) {
+        console.log('gelp')
+        let post_display = button.parentElement;
+        let post_editor = post_display.nextElementSibling;
+        let postID = button.classList[1];
+        
+        post_display.classList.add('hidden')
+        post_editor.classList.remove('hidden')
+        let editor = new Quill(`#post-body${postID}`, {
+            modules: { toolbar: `#toolbar${postID}` },
+            theme: 'snow',
+        });
+        post_editors[postID] = editor
+    }
+    $('.edit-button').on('click', function() {
+        let post_display = $(this).parent();
+        let post_editor = post_display.next();
+        let postID = $(this).attr('class').split(/\s+/)[1];
+        
+        post_display.addClass('hidden')
+        post_editor.removeClass('hidden')
+        let editor = new Quill(`#post-body${postID}`, {
+            modules: { toolbar: `#toolbar${postID}` },
+            theme: 'snow',
+        });
+        post_editors[postID] = editor
     })
+
+    function SubmitEdits(submit_button) {
+        let content = post_editors[submit_button.classList[0]].root.innerHTML
+        let post_editor = post_editors[submit_button.classList[0]].root.parentElement.parentElement.parentElement
+        let post_display = post_editor.previousElementSibling
+
+        console.log(post_display.firstChild.nextElementSibling)
+
+        $.ajax(
+            {   
+                data: {
+                    post_content: content,
+                    post_id: submit_button.classList[0]
+                },
+                type: 'POST',
+                url: '{{url_for("update_post")}}'
+            }
+        )
+        .done(
+            function(result) {
+                post_display.firstChild.nextElementSibling.innerHTML = result.content
+                post_display.classList.remove('hidden')
+                post_editor.classList.add('hidden')
+                post_editors[submit_button.classList[0]].root.innerHTML = ""
+            }
+        )
+    }
 
 </script>
 {% endblock %}

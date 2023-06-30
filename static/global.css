@@ -12,6 +12,15 @@ body {
     display:-webkit-box;
 }
 
+.reply-form .ql-picker-options{
+    display: inline-block !important;
+    top:unset !important;
+}
+
+.reply-form .ql-picker-item {
+    display: inline-block !important;
+}
+
 .card {
 	width: 48rem;
     border:transparent;
@@ -47,9 +56,8 @@ body {
 }
 
 #post-submit {
-    position: absolute;
-    right: 1rem;
-    left: auto;
+    float:right;
+    margin-left:1rem;
 }
 
 .button-tray {
@@ -173,6 +181,11 @@ body {
 .reply-col .card {
     width: unset !important;
     border-radius: 0px;
+    display:block !important;
+}
+
+.reply-editor {
+    display: unset !important;
 }
 
 .fa-trash-o {

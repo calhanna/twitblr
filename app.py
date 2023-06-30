@@ -260,7 +260,6 @@ def create_post():
         print('A POST IS BEING MADE')
         content = request.form["post_content"]
         reply_id = request.form["reply_id"]
-        print(reply_id)
         if reply_id == '0': reply_id = None
 
         db = get_db()
@@ -280,8 +279,8 @@ def create_post():
         # Step 2: Purge the base64 data
 
         error = None
-
-        if not content:
+        
+        if not request.form["stripped_content"].strip().strip('\n'):
             error = "Post body required"
         else:
             cursor = db.cursor()
@@ -292,10 +291,7 @@ def create_post():
                 )
             db.commit()
 
-            return redirect(url_for('profile'))
-
-        flash(error)
-    return render_template('/blog/createPost.html')
+        return jsonify({'error': error})
 
 @app.route("/delete_post/<post_id>", methods=["GET", "POST"])
 def delete_post(post_id):
@@ -335,21 +331,17 @@ def profile():
         post.append(replies)
 
     if request.method=="POST":
+        print('succesfully made it to upload process')
         # Upload user profile_picture
-        if 'pfp' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
         file = request.files['pfp']
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
         if file.filename == '':
-            flash('No selected file')
+            print('No selected file')
             return redirect(request.url)
         if file and allowed_file(file.filename):
             upload_folder = app.config['UPLOAD_FOLDER'].replace("./static/", "./")
             n = "%s.%s" % (g.user[0], file.filename.split('.')[-1])
-
-            print
 
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], n))
             cursor.execute(
@@ -357,7 +349,23 @@ def profile():
                 (os.path.join(upload_folder, n), g.user[0])
                 )
             db.commit()
-    return render_template('/blog/profile.html', posts=posts)
+
+            return redirect(url_for("profile"))
+    return render_template('/blog/profile.html', posts=posts, activated_posts=check_user_likes())
+
+@app.route('/update_post', methods=["POST"])
+def update_post():
+    content = request.form['post_content']
+    post_id = request.form['post_id']
+    sql = "UPDATE tblpost SET content = %s WHERE post_id = %s"
+
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute(sql, (content, post_id))
+
+    db.commit()
+
+    return jsonify({'content':content})
 
 @app.route("/logout", methods=["GET"])
 def logout():

@@ -1,4 +1,7 @@
 ﻿{% extends "./base.html" %}
+
+{% import "./macros.html" as macros %}
+
 {% block head %}
     {{ super() }}
     <!-- Local Stylesheet -->
@@ -117,157 +120,20 @@
 {% block main_content %}
     <div class="posts">
         {% for post in posts %}
-            <div class="row">
-                <div class="col-lg-12 p-2 d-flex">
-                    <div class="card mx-auto">
-                        <div class="card-body">
-                            <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=post[-5].strip('.'))}}" />        {{ post[1] }}</h5>
-                            <div>
-                                <p class="card-text">{{ post[4] |safe}}</p>
-                            </div>
-                            <a 
-                                onclick="Show_Reply_Creator(this)"
-                                class="action-link {{post[0]}}"
-                            >
-                                <i class="fa fa-reply" aria-hidden="true"></i>
-                            </a>
-                            <a 
-                                href="#" 
-                                class="action-link {{post[0]}} like-button {% if post[0] in activated_posts[0]%}activated{% endif %}"
-                            >
-                                <i class="fa fa-thumbs-up {{post[0]}}" aria-hidden="true"></i>  {{post[-4]}}
-                            </a> 
-                            <a 
-                                href="#"
-                                class="action-link {{post[0]}} dislike-button {% if post[0] in activated_posts[1]%}activated{% endif %}"
-                            >
-                                <i class="fa fa-thumbs-down {{post[0]}}" aria-hidden="true"></i>  {{post[-3]}}
-                            </a>
+            {{ macros.display_post(post, activated_posts) }}
 
-                            {% if post[-1]|length > 0 %}
-                            <button onclick="Show_Replies({{post[0]}})">Show {{ post[-1]|length }} Replies </button>
-                            {% endif %}
+            <!-- This is the dropdown for the reply editor -->
+            {{ macros.reply_editor(post) }}
 
-                            {% if g.user[5] == '1' %}
-                                <a 
-                                    href="{{url_for('delete_post', post_id=post[0])}}"
-                                    class="action-link"
-                                >
-                                    <i class="fa fa-trash-o" aria-hidden="true"></i>
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row minimised p-2 reply-row" id="reply-row{{post[0]}}">
-                <div class="card reply-editor">
-                    <form class="reply-form {{post[0]}}" method="POST">
-                        <!-- Quill Editor -->
-                        <div oninput='ValidatePost()' id="post-body{{post[0]}}" name="postContent" required></div>
-                        <div id="toolbar{{post[0]}}">
-                            <span id="counter" style="color:green">0/255</span> 
-                            <span class="ql-formats">
-                                <button class="ql-bold"></button>
-                                <button class="ql-italic"></button>
-                                <button class="ql-underline"></button>
-                                <button class="ql-strike"></button>
-                            </span>
-                            <span class="ql-formats">
-                                <select class="ql-align"></select>
-                            </span>
-                            <span class="ql-format-group">
-                            <select title="Size" class="ql-size">
-                                <option value="10px">Small</option>
-                                <option value="13px">Normal</option>
-                                <option value="18px">Large</option>
-                                <option value="32px">Huge</option>
-                            </select>
-                            </span>
-                            <span class="ql-formats">
-                                <button class="ql-image"></button>
-                            </span>
-                            <input class="mx-auto d-flex align-middle" id="post-submit" onclick="SubmitForm()" type="submit" value="Create Post">
-                        </div>
-                    </form>
-                </div>
-            </div>
+            <!-- This is the dropdown for the existing replies to the post -->
             <div class="reply-container minimised" id="replies-{{post[0]}}">
                 <!-- Display each reply to each post -->
                 {% for reply in post[-1]%}
 
-                    <div class="row">
-                        <div class="col-12 reply-col">
+                    {{ macros.display_reply(reply, activated_posts) }}
 
-                            <div class="card">
-
-                                <div class="card-body">
-                                    <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=reply[-4].strip('.'))}}" />        {{ reply[1] }}</h5>
-                                    
-                                    <div>
-                                        <p class="card-text">{{ reply[4] |safe}}</p>
-                                    </div>
-                                    
-                                    <!-- Reply Button-->
-                                    <a 
-                                        onclick="Show_Reply_Creator(this)"
-                                        class="action-link {{reply[0]}}"
-                                    >
-                                        <i class="fa fa-reply" aria-hidden="true"></i>
-                                    </a>
-                                    
-                                    <!-- Like button. Requires a lot of post information -->
-                                    <a href="{{url_for('add_likes', args=[reply[0], False])}}" onclick="AddLikes({{reply[0]}}, {{reply[-3]}}, {{reply[-2]}}, 0)" class="action-link {{reply[0]}}">
-                                        <i class="fa fa-thumbs-up {{reply[-1]}}" aria-hidden="true"></i>  {{reply[-3]}}
-                                    </a> 
-
-                                    <a href="{{url_for('add_likes', args=[reply[0], True])}}" onclick="AddLikes({{reply[0]}}, {{reply[-3]}}, {{reply[-2]}}, 1)" class="action-link {{reply[0]}}">
-                                        <i class="fa fa-thumbs-down {{reply[-1]}}" aria-hidden="true"></i>  {{reply[-2]}}
-                                    </a>
-
-                                    {% if g.user[5] == '1' %}
-                                        <a href="{{url_for('delete_post', post_id=reply[0])}}" class="action-link">
-                                            <i class="fa fa-trash-o" aria-hidden="true"></i>
-                                        </a>
-                                    {% endif %}
-
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="row minimised p-2 reply-row" id="reply-row{{reply[0]}}">
-                        <div class="card reply-editor">
-                            <form class="reply-form {{reply[0]}}" method="POST">
-                                <!-- Quill Editor -->
-                                <div oninput='ValidatePost()' id="post-body{{reply[0]}}" name="postContent" required></div>
-                                <div id="toolbar{{reply[0]}}">
-                                    <span id="counter" style="color:green">0/255</span> 
-                                    <span class="ql-formats">
-                                        <button class="ql-bold"></button>
-                                        <button class="ql-italic"></button>
-                                        <button class="ql-underline"></button>
-                                        <button class="ql-strike"></button>
-                                    </span>
-                                    <span class="ql-formats">
-                                        <select class="ql-align"></select>
-                                    </span>
-                                    <span class="ql-format-group">
-                                    <select title="Size" class="ql-size">
-                                        <option value="10px">Small</option>
-                                        <option value="13px">Normal</option>
-                                        <option value="18px">Large</option>
-                                        <option value="32px">Huge</option>
-                                    </select>
-                                    </span>
-                                    <span class="ql-formats">
-                                        <button class="ql-image"></button>
-                                    </span>
-                                    <input class="mx-auto d-flex align-middle" id="post-submit" onclick="SubmitForm()" type="submit" value="Create Post">
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                    <!-- This is a reply editor for each reply -->
+                    {{ macros.reply_editor(reply) }}
                 {% endfor %}
             </div>
         {% endfor %}

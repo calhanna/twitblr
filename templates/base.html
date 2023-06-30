@@ -163,7 +163,7 @@
         // Check character count, update counter
         var length = post_body.innerText.length;
         document.getElementById('counter').innerHTML = length + '/255';
-        if (length > 255) {
+        if (length > 255 || length == 0) {
             counter.style.color = 'red';
             document.getElementById('post-submit').disabled=true;
         } else {
@@ -193,6 +193,7 @@
                 theme: 'snow',
             });
             reply_editors[post_id] = editor;
+            console.log(editor)
         }
     }
     
@@ -202,11 +203,15 @@
         let post_num = classArr[1];
         let editor = reply_editors[post_num];
         let post_body = editor.root.innerHTML;
-        $.post("{{url_for('create_post')}}", {post_content: post_body, reply_id: post_num}, function(result){
+        let raw_body = editor.root.innerText;
+        $.post("{{url_for('create_post')}}", {post_content: post_body, reply_id: post_num, stripped_content: raw_body}, function(result){
             console.log(result);
+            location.reload();
         });
-        location.reload()
     })
 </script>
 {% endblock %}
+
+
+
 </html>
