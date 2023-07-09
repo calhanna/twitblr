@@ -21,7 +21,7 @@ body {
     display: inline-block !important;
 }
 
-.card {
+.post-container .card {
 	width: 48rem;
     border:transparent;
 }
@@ -178,6 +178,57 @@ body {
     padding-left:1.5em;
 }
 
+.message-col {
+    position:absolute;
+    right:5.5em;
+    margin-top:2em;
+    height:100vw;
+}
+
+.convo-body {
+    overflow-y: scroll;
+    height: 14rem;
+    transition: 3s;
+}
+
+.message {
+    display: flex;
+    align-items: center;
+    padding:0.5em;
+    width:100%;
+}
+
+.message.outgoing {
+    justify-content: end;
+}
+
+.message .pfp {
+    float: left;
+}
+
+.convo-submit {
+    border: none;
+    background:  none;
+}
+
+.message-body {
+    background-color: gray;
+    border-radius: 20px;
+    padding: 1em;
+    color: white;
+    display:inline-block;
+}
+
+.outgoing .message-body {
+    background-color: blue;
+}
+
+.convo-title {
+    padding:0.5em;
+    padding-bottom:0;
+    border-bottom: solid 1px rgb(205,205,205);
+}
+
 .reply-col .card {
     width: unset !important;
     border-radius: 0px;
@@ -252,6 +303,11 @@ a {
 	color: black;
 }
 
+.profile-link {
+    text-decoration: none;
+    color:inherit;
+}
+
 .stylish-link {
 	text-decoration: none;
 	color:inherit;
@@ -274,6 +330,7 @@ a {
 
 .sticky-top {
 	z-index:1 !important;
+    top:0.5rem !important;
 }
 
 .overlay {
@@ -300,6 +357,10 @@ a {
     transition: 0.3s;
     padding:0px !important;
     display:none;
+}
+
+.no-display-none {
+    display:unset !important;
 }
 
 body {

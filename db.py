@@ -9,17 +9,17 @@ import pymysql
 def create_connection():
     try:
         return pymysql.connect(
-            host="10.0.0.17",
-            user="calhanna",
+            host="localhost",
+            user="root",
             # host="localhost",
             # user="root",
             password="ALBUM",
-            db="calhanna",
+            db="twitblr",
             charset="utf8mb4",
             cursorclass=pymysql.cursors.Cursor
         )
-    except pymysql.err.OperationalError:
-        print("Cucumber error. Please reinstall universe and restart. ")
+    except pymysql.err.OperationalError as e:
+        print(e)
         return DummyConnection()
 
 def get_db():

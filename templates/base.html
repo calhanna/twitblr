@@ -45,7 +45,7 @@
     <div class="container mx-auto">
         <div class="row mx-auto">
             <div class="col-3" id="nav-col">
-                <div class="sticky-top mx-auto" style="top:0.5rem">
+                <div class="sticky-top mx-auto">
                     {% block nav_content%}
                     
                     {% endblock %}
@@ -54,6 +54,40 @@
             <div class="col-9 p-4 post-container">
                 {% block main_content %}
                 {% endblock %}
+            </div>
+            <div class="col-3 message-col" id="message-col">
+                <div class="sticky-top">
+                    {% for conversation in conversations %}
+                        <div class="card"> 
+                            <div class="card-title convo-title">
+                                {% if conversation[0][2] == 'Direct' %}
+                                    <h5>{{conversation[2][0][1] if conversation[2][0][0] != g.user[0] else conversation[2][1][1]}}</h3>
+                                {% endif %}
+                            </div>
+                            <div class="minimised no-display-none">
+                                <div class="card-body convo-body">
+                                    {% for message in conversation[1] %}
+                                        <div class="message message-{{conversation[0][0]}} {% if message[1] == g.user[0] %}outgoing{% endif %}">
+                                            {% if message[1] == g.user[0] %}
+                                                <div class="message-body">{{message[3]}}</div>
+                                                <img class="pfp" src="{{url_for('static', filename=message[9].strip('.'))}}" />
+                                            {% else %}
+                                                <img class="pfp" src="{{url_for('static', filename=message[9].strip('.'))}}" />
+                                                <div class="message-body">{{message[3]}}</div>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="card-footer">
+                                    <div class="messager-form {{conversation[0][0]}}" id="messenger-{{conversation[0][0]}}" action="#">
+                                        <input type="text" name="message-body" />
+                                        <button type="submit" class="convo-submit" > <i class="fa fa-paper-plane"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
@@ -209,6 +243,66 @@
             location.reload();
         });
     })
+
+    $('.report-button').on('click', function(e) {
+        $.ajax(
+        {
+            data: {
+                user_id: parseInt("{{g.user[0]}}"),
+                reported_user: parseInt("{{user}}"),
+                reason: 'racism'
+            },
+            type: 'POST',
+            url: "{{url_for('report')}}"
+        }
+        )
+    })
+
+    function createElementFromHTML(htmlString) {
+        // Stackoverflow code. Creates an html element from a string
+        var div = document.createElement('div');
+        div.innerHTML = htmlString.trim();
+
+        return div.firstChild;
+    }
+
+    function SendMessage(form) {
+        // Send message FUNction. Ajax, also uses fancy button.
+        let form_data = form.children('input').last().val()
+        console.log(form)
+        let classList = form.attr('class').split(/\s+/) // i hate jquery
+        let convo_body = form.parent().prev() 
+        $.ajax(
+            {
+                data: {
+                    message_body: form_data,
+                    convo_id: parseInt(classList[1])
+                },
+                type: 'POST',
+                url: "{{url_for('send_message')}}"
+            }
+        )
+        .done( function(result) {
+            console.log(result["html"])
+            convo_body.append(result['html'])
+            let latest_message = convo_body.children().last()
+            form.children('input').val("")
+            convo_body.scrollTop(latest_message.offset().top)
+        }
+        )
+    }
+
+    $('.convo-submit').on("click", function(e) {
+        SendMessage($(this).parent())
+    })
+
+    // Because the messenger body is no longer a <form>, we have to reverse engineer the enter key functionality
+    $('.messager-form').keyup(function(e){
+        if(e.keyCode == 13)
+        {
+            $(this).children().last().click()
+        }
+    });
 </script>
 {% endblock %}
 

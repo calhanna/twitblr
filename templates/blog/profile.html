@@ -17,14 +17,14 @@
                 <img src="{{url_for('static', filename=g.user[4].strip('.'))}}" class="pfp-lg card-image-top"/>
                 <div class="change-pfp pfp-lg">
                     <i class="fa fa-camera fa-4"></i>
-                    <form id="pfp-form" method="POST" enctype="multipart/form-data" action="{{url_for('profile')}}">
+                    <form id="pfp-form" method="POST" enctype="multipart/form-data" action="{{url_for('profile', user=g.user[0])}}">
                         <input name="pfp" id="pfp-chooser" type="file"/>
                     </form>
                 </div>
             </div>
             <br>
             <h5 class="card-title">{{g.user[1]}}</h5>
-            <a href="{{url_for('profile')}}" class="btn btn-primary">Profile</a>
+            <a href="{{url_for('profile', user=g.user[0])}}" class="btn btn-primary">Profile</a>
             <a href="{{url_for('auth.sign_out')}}" class="btn min-button"><i class="fa fa-sign-out"></i></a>
         </div>
     {% else %}
@@ -32,13 +32,33 @@
     {% endif %}
     <div class="side-nav">
     <!-- Navigation Buttons -->
-    <a class="nav-button" href="#" onclick="Show_Post_Creator()">Create Post</a>
-    <br>
+    {% if user == g.user[0] %}
+        <a class="nav-button" href="#" onclick="Show_Post_Creator()">Create Post</a>
+        <br>
+    {% endif %}
     <a class="nav-button" href="{{url_for('dashboard')}}">Dashboard</a>
     </div>
 {% endblock %}
 
 {% block main_content %}
+    <div class="row">
+        <div class="col-lg-12 p-2 d-flex">
+            <div class="card mx-auto">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-2">
+                            <img class="pfp-lg profile-pfp" src="{{url_for('static', filename=user_info[4].strip('.'))}}"/>
+                        </div>
+                        <div class="col-10 my-auto">
+                            <h1 class="profile-title"> {{user_info[1] }}'s Profile</h1>
+                            <button class="banner-button" id="message-button"> Message </button>
+                            <button class="banner-button report-button"> Report </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="create-post hidden">
         <div class="row">
             <div class="col-lg-12 p-2 d-flex">
@@ -85,7 +105,9 @@
                 <div class="col-lg-12 p-2 d-flex">
                     <div class="card mx-auto">
                         <div class="card-body">
-                            <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=post[-5].strip('.'))}}" />        {{ post[1] }}</h5>
+                            <a class="profile-link" href="{{url_for('profile', user=post[1])}}">
+                                <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=post[-6].strip('.'))}}" />        {{ post[-2] }}</h5>
+                            </a>
                             <div class="post-display">
                                 <div>
                                     <p class="card-text">{{ post[4] |safe}}</p>
@@ -100,37 +122,41 @@
                                     href="#" 
                                     class="action-link {{post[0]}} like-button {% if post[0] in activated_posts[0]%}activated{% endif %}"
                                 >
-                                    <i class="fa fa-thumbs-up {{post[0]}}" aria-hidden="true"></i>  {{post[-4]}}
+                                    <i class="fa fa-thumbs-up {{post[0]}}" aria-hidden="true"></i>  {{post[-5]}}
                                 </a> 
                                 <a 
                                     href="#"
                                     class="action-link {{post[0]}} dislike-button {% if post[0] in activated_posts[1]%}activated{% endif %}"
                                 >
-                                    <i class="fa fa-thumbs-down {{post[0]}}" aria-hidden="true"></i>  {{post[-3]}}
+                                    <i class="fa fa-thumbs-down {{post[0]}}" aria-hidden="true"></i>  {{post[-4]}}
                                 </a>
 
                                 {% if post[-1]|length > 0 %}
                                 <button onclick="Show_Replies({{post[0]}})">Show {{ post[-1]|length }} Replies </button>
                                 {% endif %}
+                                
+                                {% if g.user[0] == user or g.user[5] == '1' %}
+                                    <a 
+                                        href="{{url_for('delete_post', post_id=post[0])}}"
+                                        class="action-link"
+                                    >
+                                        <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                    </a>
 
-                                <a 
-                                    href="{{url_for('delete_post', post_id=post[0])}}"
-                                    class="action-link"
-                                >
-                                    <i class="fa fa-trash-o" aria-hidden="true"></i>
-                                </a>
-
-                                <a 
-                                    href="#"
-                                    class="action-link {{post[0]}} edit-button"
-                                >
-                                    <i class="fa fa-edit" aria-hidden="true"></i>
-                                </a>
+                                    {% if g.user[0] == user %}
+                                        <a 
+                                            href="#"
+                                            class="action-link {{post[0]}} edit-button"
+                                        >
+                                            <i class="fa fa-edit" aria-hidden="true"></i>
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
                             </div>
                             <div class="post-editor hidden">
                                 <form class="{{post[0]}}" method="POST" action="javascript:void(0);">
                                     <!-- Quill Editor -->
-                                    <div oninput="ValidatePost()" id="post-body{{post[0]}}" name="postContent" required></div>
+                                    <div oninput="ValidatePost()" id="post-body{{post[0]}}" name="postContent" required> {{ post[4] |safe}} </div>
                                     <div id="toolbar{{post[0]}}">
                                         <span id="counter" style="color:green">0/255</span> 
                                         <span class="ql-formats">
@@ -205,26 +231,6 @@
     $(document).ready(function() {
         $('#pfp-chooser').on('change', function() {
             document.getElementById('pfp-form').submit();
-            /*
-            var pfp_data = new FormData();
-            var pfp_chooser = document.getElementById('pfp-chooser');
-            pfp_data.append('pfp', pfp_chooser.files[0]);
-
-            $.ajax({
-                url: '{{url_for("profile")}}',
-                type: 'POST',
-                processData: false, // important
-                contentType: false, // important
-                dataType : 'json',
-                data: pfp_data
-            })
-            .done( function(data) {
-                if (data.success) {
-                    window.location.href = window.location.href;
-                }
-            }
-            );
-            */
         });
     });
 
@@ -242,6 +248,7 @@
         });
         post_editors[postID] = editor
     }
+
     $('.edit-button').on('click', function() {
         let post_display = $(this).parent();
         let post_editor = post_display.next();
@@ -282,6 +289,31 @@
             }
         )
     }
+
+    $("#message-button").on('click', function() {
+        $.post('{{url_for("create_conversation")}}', {
+            recipitent_id: parseInt("{{user}}"),
+            type: 'Direct'
+        }, function(result) {
+            if (result['success']) {
+                $('#message-col').children().first().prepend(result['html'])
+                new_element = $(result['html'])
+                console.log(new_element.find(".convo-submit"))
+
+                // had an issue here that took me like an hour to fix
+                // turns out we have to this to reset the event attachment
+                $('.convo-submit').on("click", function(e) {
+                    SendMessage($(this).parent())
+                })
+                $('.messager-form').keyup(function(e){
+                    if(e.keyCode == 13)
+                    {
+                        $(this).children().last().click()
+                    }
+                });
+            }
+        })
+    })
 
 </script>
 {% endblock %}

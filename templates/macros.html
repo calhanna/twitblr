@@ -27,7 +27,9 @@
     <div class="col-lg-12 p-2 d-flex">
         <div class="card mx-auto">
             <div class="card-body">
-                <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=post[-5].strip('.'))}}" />        {{ post[1] }}</h5>
+                <a class="profile-link" href="{{url_for('profile', user=post[1])}}">
+                    <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=post[-6].strip('.'))}}" />        {{ post[-2] }}</h5>
+                </a>
                 <div>
                     <p class="card-text">{{ post[4] |safe}}</p>
                 </div>
@@ -41,13 +43,13 @@
                     href="#" 
                     class="action-link {{post[0]}} like-button {% if post[0] in activated_posts[0]%}activated{% endif %}"
                 >
-                    <i class="fa fa-thumbs-up {{post[0]}}" aria-hidden="true"></i>  {{post[-4]}}
+                    <i class="fa fa-thumbs-up {{post[0]}}" aria-hidden="true"></i>  {{post[-5]}}
                 </a> 
                 <a 
                     href="#"
                     class="action-link {{post[0]}} dislike-button {% if post[0] in activated_posts[1]%}activated{% endif %}"
                 >
-                    <i class="fa fa-thumbs-down {{post[0]}}" aria-hidden="true"></i>  {{post[-3]}}
+                    <i class="fa fa-thumbs-down {{post[0]}}" aria-hidden="true"></i>  {{post[-4]}}
                 </a>
 
                 {% if post[-1]|length > 0 %}
@@ -75,7 +77,9 @@
         <div class="card">
 
             <div class="card-body">
-                <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=reply[-4].strip('.'))}}" />        {{ reply[1] }}</h5>
+                <a class="profile-link" href="{{url_for('profile', user=reply[1])}}">
+                    <h5 class="card-title"><img class="pfp" src="{{url_for('static', filename=reply[-5].strip('.'))}}" />        {{ reply[-1] }}</h5>
+                </a>
                 
                 <div>
                     <p class="card-text">{{ reply[4] |safe}}</p>
@@ -94,13 +98,13 @@
                     href="#" 
                     class="action-link {{reply[0]}} like-button {% if reply[0] in activated_posts[0]%}activated{% endif %}"
                 >
-                    <i class="fa fa-thumbs-up {{reply[0]}}" aria-hidden="true"></i>  {{reply[-3]}}
+                    <i class="fa fa-thumbs-up {{reply[0]}}" aria-hidden="true"></i>  {{reply[-4]}}
                 </a> 
                 <a 
                     href="#"
                     class="action-link {{reply[0]}} dislike-button {% if reply[0] in activated_posts[1]%}activated{% endif %}"
                 >
-                    <i class="fa fa-thumbs-down {{reply[0]}}" aria-hidden="true"></i>  {{reply[-2]}}
+                    <i class="fa fa-thumbs-down {{reply[0]}}" aria-hidden="true"></i>  {{reply[-3]}}
                 </a>
 
                 {% if g.user[5] == '1' %}

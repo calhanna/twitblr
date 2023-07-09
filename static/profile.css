@@ -7,6 +7,27 @@
     box-shadow: 1px 1px #888888;
 }
 
+.profile-title {
+}
+
+.banner-button {
+    border-radius:10px;
+    background-color: blue;
+    border: transparent;
+    padding: 0.25em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    color: white;
+}
+
+.report-button {
+    background-color:red;
+}
+
+.profile-pfp {
+    display:inline;
+}
+
 #first-button {
     margin-left: 1em;
 }

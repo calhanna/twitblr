@@ -38,6 +38,11 @@ wsgi_app = app.wsgi_app
 # Blueprint for authentication functions
 app.register_blueprint(auth.bp)
 
+def get_current_time():
+    """ Returns the current datetime formatted for MySQL """
+
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
 @app.route('/')
 def index():
     """
@@ -56,6 +61,10 @@ def page_not_found(e):
     # note that we set the 404 status explicitly
     return render_template('oopsie.html'), 500
 
+@app.context_processor
+def inject_conversations():
+    return dict(conversations=fetch_conversations())
+
 def check_likes(cursor, post):
     """ 
         Likes/Dislikes are stored in a table called 'actions'
@@ -64,7 +73,7 @@ def check_likes(cursor, post):
     """
 
     # Execute SQL to fetch actions
-    sql = "SELECT * FROM TBLactions WHERE post_id = %s"
+    sql = "SELECT * FROM tblactions WHERE post_id = %s"
     cursor.execute(sql, (post[0]))
 
     # Convert tuple to array (possibly a no longer necessary artifact of an older implementation, but hey it works)
@@ -88,11 +97,10 @@ def fetch_post(post, cursor):
     # Fetch the username using the user_id
     # We can either run an SQL check for every post or we can do it in python. I'm doing the SQL check because I think it's easier
     cursor.execute(
-        "SELECT * FROM TBLusers WHERE ID = %s",
+        "SELECT * FROM tblusers WHERE ID = %s",
         (user_id)
         )
     user = cursor.fetchone()
-    post[1] = user[1]   # Override the user_id number with the name of the user
     post.append(user[4])
 
     # Fetch likes/dislikes
@@ -103,16 +111,16 @@ def fetch_post(post, cursor):
     last_action = None
     if g.user is not None:
         last_action = 'none'
-        cursor.execute("SELECT * FROM TBLactions WHERE post_id = %s AND user_id = %s", (post[0], g.user[0]))
+        cursor.execute("SELECT * FROM tblactions WHERE post_id = %s AND user_id = %s", (post[0], g.user[0]))
         results = list(cursor.fetchall())
         if results:
             last_action = results[-1] 
 
     # Tally up the likes/dislikes, only considering the last action of each user
     likes, dislikes = 0, 0
-    for user in user_actions:
-        if user_actions[user]:
-            a = user_actions[user][0]   # I'm sorry for the single character variable but it only exists in this scope ok?
+    for user_id in user_actions:
+        if user_actions[user_id]:
+            a = user_actions[user_id][0]   # I'm sorry for the single character variable but it only exists in this scope ok?
             if a == "Like":
                 likes += 1
             else:
@@ -122,8 +130,7 @@ def fetch_post(post, cursor):
     # Use regex to search for HTML tags, i.e <h1>, <img>, <script>
     #for tag in re.findall(r"<.*>", post[4]):
         #post[4] = post[4].replace(tag, markupsafe.escape(tag))
-
-    post.extend([likes, dislikes, last_action])
+    post.extend([likes, dislikes, last_action, user[1]])
     return post
 
 def fetch_replies(post, cursor, checked):
@@ -131,7 +138,7 @@ def fetch_replies(post, cursor, checked):
     if post not in checked:
         checked.append(post)
         cursor.execute(
-            "SELECT * FROM TBLpost WHERE reply_id = %s",
+            "SELECT * FROM tblpost WHERE reply_id = %s",
             (post[0])
         )
         replies = list(cursor.fetchall())
@@ -159,11 +166,11 @@ def dashboard():
         if g.user is not None:
             # Fetch all posts excluding those made by the current user.
             cursor.execute(
-                "SELECT * FROM TBLpost WHERE user_id != %s AND reply_id IS Null",
+                "SELECT * FROM tblpost WHERE user_id != %s AND reply_id IS Null",
                 (g.user[0])
                 )
         else:
-            cursor.execute("SELECT * FROM TBLpost WHERE reply_id IS NULL")
+            cursor.execute("SELECT * FROM tblpost WHERE reply_id IS NULL")
         
         posts = cursor.fetchall()
 
@@ -182,7 +189,7 @@ def dashboard():
 
     with db.cursor() as cursor:
         cursor.execute(
-            "SELECT * FROM TBLusers"
+            "SELECT * FROM tblusers"
         )
         users = cursor.fetchall()
         username_list = [user[1] for user in users]
@@ -192,7 +199,7 @@ def dashboard():
 @app.route('/check_user_likes', methods=["GET"])
 def check_user_likes():
     if g.user != None:
-        sql = "SELECT * FROM TBLactions WHERE user_id = %s"
+        sql = "SELECT * FROM tblactions WHERE user_id = %s"
 
         db = get_db()
         with db.cursor() as cursor:
@@ -208,7 +215,7 @@ def check_user_likes():
 
 @app.route('/add_like', methods=['POST'])
 def add_likes():
-    """ Function for adding likes to posts by creating entry in TBLactions. Slight misnomer, this function also handles dislikes"""
+    """ Function for adding likes to posts by creating entry in tblactions. Slight misnomer, this function also handles dislikes"""
 
     if request.method == 'POST':
         if g.user is None:
@@ -221,18 +228,18 @@ def add_likes():
         action = request.form['like']
         
         with db.cursor() as cursor:
-            cursor.execute("SELECT * FROM TBLactions WHERE user_id = %s AND post_id = %s", (g.user[0], post_id))
+            cursor.execute("SELECT * FROM tblactions WHERE user_id = %s AND post_id = %s", (g.user[0], post_id))
             results = cursor.fetchall()
             if len(results) == 0:
                 # Create entry
-                sql = "INSERT INTO TBLactions (post_id, user_id, type) VALUES (%s, %s, '" + action + "')"
+                sql = "INSERT INTO tblactions (post_id, user_id, type) VALUES (%s, %s, '" + action + "')"
             else:
                 if results[0][3] == action:
                     # Delete entry
-                    sql = "DELETE FROM TBLactions WHERE post_id = %s and user_id = %s"
+                    sql = "DELETE FROM tblactions WHERE post_id = %s and user_id = %s"
                 else:
                     # Update entry
-                    sql = "UPDATE TBLactions SET `type`='"+ action +"' WHERE post_id = %s and user_id = %s" 
+                    sql = "UPDATE tblactions SET `type`='"+ action +"' WHERE post_id = %s and user_id = %s" 
 
             cursor.execute(
                 sql,
@@ -240,9 +247,9 @@ def add_likes():
                 )
             db.commit()
 
-            cursor.execute('SELECT * FROM TBLactions WHERE post_id = %s AND type = "Like"', (post_id))
+            cursor.execute('SELECT * FROM tblactions WHERE post_id = %s AND type = "Like"', (post_id))
             like_count = len(cursor.fetchall())
-            cursor.execute("SELECT * FROM TBLactions WHERE post_id = %s AND type = 'Dislike'", (post_id))
+            cursor.execute("SELECT * FROM tblactions WHERE post_id = %s AND type = 'Dislike'", (post_id))
             dislike_count = len(cursor.fetchall())
 
         return jsonify(
@@ -286,7 +293,7 @@ def create_post():
             cursor = db.cursor()
             now = datetime.datetime.now()
             cursor.execute(
-                " INSERT INTO TBLpost (user_id, date, time, content, reply_id) VALUES (%s, %s, %s, %s, %s)",
+                " INSERT INTO tblpost (user_id, date, time, content, reply_id) VALUES (%s, %s, %s, %s, %s)",
                 (g.user[0], now.date(), now.time(), content, reply_id)
                 )
             db.commit()
@@ -299,24 +306,26 @@ def delete_post(post_id):
     
     with db.cursor() as cursor:
         cursor.execute(
-            "DELETE FROM TBLpost WHERE post_id = %s",
+            "DELETE FROM tblpost WHERE post_id = %s",
             (post_id)
         )
         db.commit()
 
     return redirect(session['url'])
 
-@app.route("/profile", methods = ["GET", "POST"])
-def profile():
+@app.route("/profile/<user>", methods = ["GET", "POST"])
+def profile(user):
     db = get_db()
 
-    session['url'] = url_for("profile")
+    user = int(user)
+
+    session['url'] = url_for("profile", user=user)
 
     cursor = db.cursor()
 
     cursor.execute(
-        "SELECT * FROM TBLpost WHERE user_id = %s",
-        (g.user[0])
+        "SELECT * FROM tblpost WHERE user_id = %s",
+        (user)
     )
     posts = cursor.fetchall()
     posts = [list(post) for post in posts]  # We want to edit the post and tuples can't be edited
@@ -345,13 +354,170 @@ def profile():
 
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], n))
             cursor.execute(
-                "UPDATE TBLusers SET `profile_picture` = %s WHERE ID = %s",
+                "UPDATE tblusers SET `profile_picture` = %s WHERE ID = %s",
                 (os.path.join(upload_folder, n), g.user[0])
                 )
             db.commit()
 
             return redirect(url_for("profile"))
-    return render_template('/blog/profile.html', posts=posts, activated_posts=check_user_likes())
+        
+    with db.cursor() as cursor:
+        cursor.execute("SELECT * FROM tblusers WHERE id = %s", (user))
+        user_info = cursor.fetchone()
+    
+    return render_template('/blog/profile.html', posts=posts, activated_posts=check_user_likes(), user=user, user_info=user_info)
+
+@app.route("/report", methods=["POST"])
+def report():
+    user = request.form['user_id']
+    reported_user = request.form['reported_user']
+    reason = request.form['reason']
+
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute("INSERT INTO tblreport (user_id, reported_user, reason) VALUES (%s, %s, %s)", (user, reported_user, reason))
+    db.commit()
+    return jsonify({'success': True})
+
+def fetch_conversations():
+    """ Fetches all of a user's active conversations """
+
+    if g.user is None:
+        return []
+
+    db = get_db()
+
+    # Step 1: fetch conversations
+    with db.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT * FROM tblconversations WHERE tblconversations.convo_id IN (SELECT convo_id FROM tblconvo_users WHERE user_id = %s)
+            """,
+            (g.user[0])
+        )
+
+        conversations = dict.fromkeys(cursor.fetchall())
+
+    # Step 2: Fetch all the messages in each conversation
+    for conversation in conversations.keys():
+        with db.cursor() as cursor:
+            cursor.execute("SELECT * FROM tblmessages INNER JOIN tblusers ON tblmessages.sender_id = tblusers.id WHERE convo_id = %s", (conversation[0]))
+            conversations[conversation] = cursor.fetchall()
+
+    # Step 3: Order conversations by most recent message
+    conversations = list(conversations.items())
+    try:
+        conversations.sort(key = lambda message: message[1][-1][4])
+        conversations.reverse()
+    except IndexError as e:
+        # Conversation is empty
+        print(e)
+        pass
+    
+    # Step 4: Add participants to data structure
+    conversations = [list(x) for x in conversations]
+    for conversation in conversations:
+        with db.cursor() as cursor:
+            cursor.execute("SELECT * FROM tblusers WHERE tblusers.id IN (SELECT user_id FROM tblconvo_users WHERE convo_id = %s )", [conversation[0][0]])
+            conversation.append(cursor.fetchall())
+
+    return conversations
+
+@app.route('/create_conversation', methods=["POST"])
+def create_conversation():
+    db = get_db()
+
+    recipitent_id = request.form['recipitent_id']
+    convo_type = request.form['type']
+
+    dt = get_current_time()
+    with db.cursor() as cursor:
+
+        sql = """
+            SELECT
+                convo_id 
+            FROM
+                tblconversations
+            WHERE
+                convo_id IN (
+                SELECT
+                    tblconvo_users.convo_id
+                FROM
+                    tblconvo_users
+                INNER JOIN tblconversations ON
+                    tblconversations.convo_id = tblconvo_users.convo_id
+                WHERE
+                    tblconvo_users.user_id = %s)
+                AND convo_id IN (
+                SELECT
+                    tblconvo_users.convo_id
+                FROM
+                    tblconvo_users
+                INNER JOIN tblconversations ON
+                    tblconversations.convo_id = tblconvo_users.convo_id
+                WHERE
+                    tblconvo_users.user_id = %s)
+        """
+        cursor.execute(sql, (g.user[0], int(recipitent_id)))
+        if len(cursor.fetchall()) > 0:
+            return jsonify({'success': False})
+
+        cursor.execute("INSERT INTO tblconversations (date, type) VALUES (%s, '" + convo_type + "')", (dt))
+        db.commit()
+
+        cursor.execute("SELECT username FROM tblusers WHERE id = %s", (recipitent_id))
+        recipitent = cursor.fetchone()[0]
+
+        cursor.execute("SELECT convo_id FROM tblconversations")   # Getting the autoincrement id number of the conversation we just made
+        id_number = cursor.fetchall()[-1][0]
+
+        # Add users to conversation using tblconvo_users
+        cursor.execute("INSERT INTO tblconvo_users (user_id, convo_id) VALUES (%s, %s)", (g.user[0], id_number))
+        cursor.execute("INSERT INTO tblconvo_users (user_id, convo_id) VALUES (%s, %s)", (int(recipitent_id), id_number))
+        db.commit()
+
+    html = """
+    <div class="card"> 
+        <div class="card-title convo-title">
+            <h5>%s</h3>
+        </div>
+        <div class="card-body convo-body">
+        </div>
+        <div class="card-footer">
+            <div class="messager-form %s" id="messenger-%s" action="#">
+                <input type="text" name="message-body" />
+                <button type="submit" class="convo-submit" > <i class="fa fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+    """ % (recipitent, id_number, id_number)
+
+    return jsonify({'success': True, 'html': markupsafe.Markup(html)})
+
+@app.route('/send_message', methods=["POST"])
+def send_message():
+    message_body = request.form['message_body']
+    convo_id = request.form['convo_id']
+
+    timestamp = get_current_time()
+
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute("INSERT INTO tblmessages (sender_id, convo_id, message, timestamp) VALUES (%s, %s, %s, %s)", (g.user[0], convo_id, message_body, timestamp))
+        db.commit()
+
+    message_html = """
+    <div class="message message-%s outgoing">
+        <div class="message-body">%s</div>
+        <img class="pfp" src="%s" />
+    </div>
+    """ % (convo_id, message_body, url_for('static', filename=g.user[4].strip('.')))
+
+    return jsonify({'html': message_html})
+
+@app.route('/refresh_conversation', methods=["GET"])
+def refresh_conversation():
+    pass
 
 @app.route('/update_post', methods=["POST"])
 def update_post():

@@ -41,7 +41,7 @@ def register():
             # Check if username is already taken
             with db.cursor() as cursor:
                 cursor.execute(
-                    "SELECT * FROM TBLusers WHERE username = %s",
+                    "SELECT * FROM tblusers WHERE username = %s",
                     (username)
                     )
 
@@ -50,7 +50,7 @@ def register():
 
                 # Check if email is already registered
                 cursor.execute(
-                    "SELECT * FROM TBLusers WHERE email = %s",
+                    "SELECT * FROM tblusers WHERE email = %s",
                     (email)
                     )
                 if cursor.fetchone() is not None:
@@ -59,14 +59,14 @@ def register():
         if error is None:
             try:
                 cursor = db.cursor()
-                # Create new user in TBLusers
-                sql = "INSERT INTO `TBLusers` (`username`, `password`, `email`) VALUES (%s,%s,%s)"
+                # Create new user in tblusers
+                sql = "INSERT INTO `tblusers` (`username`, `password`, `email`) VALUES (%s,%s,%s)"
                 cursor.execute(
                     sql,
                     (username, password, email)
                     )
                 db.commit()
-                cursor.execute("SELECT * FROM TBLusers WHERE username = %s", (username))
+                cursor.execute("SELECT * FROM tblusers WHERE username = %s", (username))
                 user = cursor.fetchone()
                 session.clear()
                 session['user_id'] = user[0]
@@ -88,7 +88,7 @@ def login():
         error = None
         cursor = db.cursor()
         cursor.execute(
-            'SELECT * FROM TBLusers WHERE username = %s', (username)
+            'SELECT * FROM tblusers WHERE username = %s', (username)
         )
         user = cursor.fetchone()
 
@@ -121,6 +121,6 @@ def load_logged_in_user():
     else:
         cursor = get_db().cursor()
         cursor.execute(
-            'SELECT * FROM TBLusers WHERE id = %s', (user_id,)
+            'SELECT * FROM tblusers WHERE id = %s', (user_id,)
         )
         g.user = cursor.fetchone()
