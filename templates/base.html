@@ -56,37 +56,54 @@
                 {% endblock %}
             </div>
             <div class="col-3 message-col" id="message-col">
-                <div class="sticky-top">
-                    {% for conversation in conversations %}
-                        <div class="card"> 
-                            <div class="card-title convo-title">
-                                {% if conversation[0][2] == 'Direct' %}
-                                    <h5>{{conversation[2][0][1] if conversation[2][0][0] != g.user[0] else conversation[2][1][1]}}</h3>
-                                {% endif %}
-                            </div>
-                            <div class="minimised no-display-none">
-                                <div class="card-body convo-body">
-                                    {% for message in conversation[1] %}
-                                        <div class="message message-{{conversation[0][0]}} {% if message[1] == g.user[0] %}outgoing{% endif %}">
-                                            {% if message[1] == g.user[0] %}
-                                                <div class="message-body">{{message[3]}}</div>
-                                                <img class="pfp" src="{{url_for('static', filename=message[9].strip('.'))}}" />
-                                            {% else %}
-                                                <img class="pfp" src="{{url_for('static', filename=message[9].strip('.'))}}" />
-                                                <div class="message-body">{{message[3]}}</div>
-                                            {% endif %}
+                <!-- This contains the user's direct messages, and possibly other conversations eventually. -->
+                <div class="card sticky-top dm-card">
+                    <div class="card-title dm-header">
+                        <h3> Direct Messages </h3>
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            {% for conversation in conversations %}
+                                <button class="dm-button" data-convo_child_id="{{conversation[0][0]}}">
+                                    {# This line is rather hellish but what it does is display the profile picture of the member of the conversation that is not the current user.#}
+                                    {# or, in other words, the one you're messaging. #}
+                                    {# The reason it's so horrible is that I started writing this as a one line thing #}
+                                    {# And then it needed to do more and more and it was faster to expand the one line than rewrite it in a less horrible way #}
+                                    <img class="pfp-md" src="{{url_for('static', filename=conversation[2][0][4].strip('.')) if conversation[2][0][0] != g.user[0] else url_for('static', filename=conversation[2][1][4].strip('.'))}}">
+                                </button>    
+                            {% endfor %}
+                        </div>
+                        <div class="col-10">
+                            {% for conversation in conversations %}
+                                <div class="card hidden convo" data-convo_id="{{conversation[0][0]}}"> 
+                                    <div class="card-title convo-title">
+                                        {% if conversation[0][2] == 'Direct' %}
+                                            <h5>{{conversation[2][0][1] if conversation[2][0][0] != g.user[0] else conversation[2][1][1]}}</h3>
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-body convo-body">
+                                        {% for message in conversation[1] %}
+                                            <div class="message message-{{conversation[0][0]}} {% if message[1] == g.user[0] %}outgoing{% endif %}">
+                                                {% if message[1] == g.user[0] %}
+                                                    <div class="message-body">{{message[3]}}</div>
+                                                    <img class="pfp" src="{{url_for('static', filename=message[9].strip('.'))}}" />
+                                                {% else %}
+                                                    <img class="pfp" src="{{url_for('static', filename=message[9].strip('.'))}}" />
+                                                    <div class="message-body">{{message[3]}}</div>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="messager-form {{conversation[0][0]}}" id="messenger-{{conversation[0][0]}}" action="#">
+                                            <input type="text" name="message-body" />
+                                            <button type="submit" class="convo-submit" > <i class="fa fa-paper-plane"></i></button>
                                         </div>
-                                    {% endfor %}
-                                </div>
-                                <div class="card-footer">
-                                    <div class="messager-form {{conversation[0][0]}}" id="messenger-{{conversation[0][0]}}" action="#">
-                                        <input type="text" name="message-body" />
-                                        <button type="submit" class="convo-submit" > <i class="fa fa-paper-plane"></i></button>
                                     </div>
                                 </div>
-                            </div>
+                            {% endfor %}
                         </div>
-                    {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -96,6 +113,7 @@
 
 {% block scripts %}
 <script type="text/javascript">
+    // Base scripts for the whole website. Would be nice to have this in an actual js file but that would require a lot of finicking to work with jinja variables so its really not worth it
 
     // Initialise Quill
 
@@ -232,6 +250,8 @@
     }
     
     $('.reply-form').submit(function(e) {
+        console.log('asdfasdfasdfas')
+        // Custom submission function that works with the Quill WYSWYG editor
         let classList = $(this).attr("class")
         let classArr = classList.split(/\s+/);
         let post_num = classArr[1];
@@ -242,9 +262,11 @@
             console.log(result);
             location.reload();
         });
+        e.preventDefault();
     })
 
     $('.report-button').on('click', function(e) {
+        // I added the button to fill space, so this is a quick demo function that might be expanded upon later
         $.ajax(
         {
             data: {
@@ -269,7 +291,6 @@
     function SendMessage(form) {
         // Send message FUNction. Ajax, also uses fancy button.
         let form_data = form.children('input').last().val()
-        console.log(form)
         let classList = form.attr('class').split(/\s+/) // i hate jquery
         let convo_body = form.parent().prev() 
         $.ajax(
@@ -283,7 +304,6 @@
             }
         )
         .done( function(result) {
-            console.log(result["html"])
             convo_body.append(result['html'])
             let latest_message = convo_body.children().last()
             form.children('input').val("")
@@ -296,13 +316,64 @@
         SendMessage($(this).parent())
     })
 
-    // Because the messenger body is no longer a <form>, we have to reverse engineer the enter key functionality
+    // Because the messenger body is no longer a <form>, we have to manually create the enter key functionality
     $('.messager-form').keyup(function(e){
         if(e.keyCode == 13)
         {
             $(this).children().last().click()
         }
     });
+
+    function dragElement(elmnt) {
+        // Thought this might be interesting. Code from w3schools
+
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+        elmnt.firstElementChild.onmousedown = dragMouseDown;
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            if (event.button == 0) {    // Added this myself because dragging with right click really doesn't make sense
+                e.preventDefault();
+                // get the mouse cursor position at startup:
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                // call a function whenever the cursor moves:
+                document.onmousemove = elementDrag;
+            }
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // set the element's new position:
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            // stop moving when mouse button is released:
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+
+    document.querySelectorAll('.draggable').forEach((element, key) => {
+        dragElement(element);
+    })
+
+    $('.dm-button').on('click', function(e) {
+        $(this).toggleClass('active')
+        $(this).siblings(".dm-button").removeClass("active")
+        $('.convo[data-convo_id="' + $(this).attr('data-convo_child_id') +'"]').toggleClass("hidden")
+        $('.convo[data-convo_id!="' + $(this).attr('data-convo_child_id') +'"]').addClass('hidden');
+    })
 </script>
 {% endblock %}
 

@@ -297,6 +297,7 @@ def create_post():
                 (g.user[0], now.date(), now.time(), content, reply_id)
                 )
             db.commit()
+        print(error)
 
         return jsonify({'error': error})
 
@@ -420,6 +421,8 @@ def fetch_conversations():
         with db.cursor() as cursor:
             cursor.execute("SELECT * FROM tblusers WHERE tblusers.id IN (SELECT user_id FROM tblconvo_users WHERE convo_id = %s )", [conversation[0][0]])
             conversation.append(cursor.fetchall())
+
+    # Final conversation structure: [[actual conversation data], [messages], [participants]]
 
     return conversations
 

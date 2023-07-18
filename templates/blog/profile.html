@@ -315,6 +315,20 @@
         })
     })
 
+    $('.report-button').on('click', function(e) {
+        $.ajax(
+        {
+            data: {
+                user_id: parseInt("{{g.user[0]}}"),
+                reported_user: parseInt("{{user}}"),
+                reason: 'racism'
+            },
+            type: 'POST',
+            url: "{{url_for('report')}}"
+        }
+        )
+    })
+
 </script>
 {% endblock %}
 </html>

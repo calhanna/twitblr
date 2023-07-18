@@ -1,7 +1,7 @@
 {% macro reply_editor(post) -%}
 <div class="row minimised p-2 reply-row" id="reply-row{{post[0]}}">
     <div class="card reply-editor">
-        <form class="reply-form {{post[0]}}" method="POST">
+        <form class="reply-form {{post[0]}}" >
             <!-- Quill Editor -->
             <div oninput='ValidatePost()' id="post-body{{post[0]}}" name="postContent" required></div>
             <div id="toolbar{{post[0]}}">
@@ -15,7 +15,7 @@
                 <span class="ql-formats">
                     <select class="ql-align"></select>
                 </span>
-                <input id="post-submit" onclick="SubmitForm()" type="submit" value="Create Post">
+                <input id="post-submit" type="submit" value="Create Post">
             </div>
         </form>
     </div>

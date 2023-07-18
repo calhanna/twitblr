@@ -382,3 +382,69 @@ body {
     border-width: 2px;
     box-shadow: 2px 4px rgba(30,30,30,0.1);
 }
+
+.draggable {
+    position: absolute;
+    z-index: 9;
+    background-color: #f1f1f1;
+    border: 1px solid #d3d3d3;
+    text-align: center;
+}
+
+.pfp-md {
+    width: 45px;
+    height: 45px;
+    border-radius: 22.5px;
+    border: 1px solid gray;
+}
+
+.dm-header {
+    text-align: center;
+    padding: 0.5rem;
+    border-bottom: 1px solid rgb(200,200,200);
+    border-radius: 5px;
+    margin-bottom:0;
+}
+
+.dm-button {
+    background-color: transparent;
+    border: none;
+    max-height: 45rem;
+    display: block;
+    margin-left: 11%;
+    width: 55px;
+    transition:0.5s;
+}
+
+.dm-button.active .pfp-md{
+    border: 2px solid #0d6efd;
+    width:49px;
+    height:48px;
+}
+
+.convo {
+    margin: 0px;
+    border: none !important;
+    width: 24rem;
+}
+
+.dm-card {
+    height: 24.6rem;
+}
+
+.dm-card .row{
+    height:100%;
+    padding-top:0;
+    margin-top: 0;
+}
+
+.dm-card .col-2 {
+    border-right: 1px solid rgb(200,200,200);
+    height: 100%;
+    min-height: 100%;
+    padding-top: 0.5rem;
+}
+
+.dm-card .col-10 {
+    padding:0;
+}
