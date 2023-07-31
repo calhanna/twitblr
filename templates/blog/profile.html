@@ -30,6 +30,7 @@
     {% else %}
         <button class="nav-button login-button" onclick="Display_Overlay()"> Sign In </button>
     {% endif %}
+    <br>
     <div class="side-nav">
     <!-- Navigation Buttons -->
     {% if user == g.user[0] %}
@@ -51,8 +52,10 @@
                         </div>
                         <div class="col-10 my-auto">
                             <h1 class="profile-title"> {{user_info[1] }}'s Profile</h1>
-                            <button class="banner-button" id="message-button"> Message </button>
-                            <button class="banner-button report-button"> Report </button>
+                            {% if g.user[0] != user %}
+                                <button class="banner-button" id="message-button"> Message </button>
+                                <button class="banner-button report-button"> Report </button>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -156,8 +159,8 @@
                             <div class="post-editor hidden">
                                 <form class="{{post[0]}}" method="POST" action="javascript:void(0);">
                                     <!-- Quill Editor -->
-                                    <div oninput="ValidatePost()" id="post-body{{post[0]}}" name="postContent" required> {{ post[4] |safe}} </div>
-                                    <div id="toolbar{{post[0]}}">
+                                    <div oninput="ValidatePost()" id="edit-post-body{{post[0]}}" name="postContent" required> {{ post[4] |safe}} </div>
+                                    <div id="edit-toolbar{{post[0]}}">
                                         <span id="counter" style="color:green">0/255</span> 
                                         <span class="ql-formats">
                                             <button class="ql-bold"></button>
@@ -234,21 +237,6 @@
         });
     });
 
-    function EditPost(button) {
-        console.log('gelp')
-        let post_display = button.parentElement;
-        let post_editor = post_display.nextElementSibling;
-        let postID = button.classList[1];
-        
-        post_display.classList.add('hidden')
-        post_editor.classList.remove('hidden')
-        let editor = new Quill(`#post-body${postID}`, {
-            modules: { toolbar: `#toolbar${postID}` },
-            theme: 'snow',
-        });
-        post_editors[postID] = editor
-    }
-
     $('.edit-button').on('click', function() {
         let post_display = $(this).parent();
         let post_editor = post_display.next();
@@ -256,8 +244,8 @@
         
         post_display.addClass('hidden')
         post_editor.removeClass('hidden')
-        let editor = new Quill(`#post-body${postID}`, {
-            modules: { toolbar: `#toolbar${postID}` },
+        let editor = new Quill(`#edit-post-body${postID}`, {
+            modules: { toolbar: `#edit-toolbar${postID}` },
             theme: 'snow',
         });
         post_editors[postID] = editor

@@ -76,10 +76,13 @@ body {
     left: 0px;
     position: relative;
     margin-top:1rem;
+    float: right;
+    display: grid;
+    min-width:100%;
 }
 
 .nav-button {
-	width: 100%;
+	width: 12rem;
     margin: 0px;
     display: block;
     padding: 10px;
@@ -94,6 +97,12 @@ body {
     border-top: none;
     border-radius:20px;
     font-weight:bold;
+    float:right;
+    margin-left:auto;
+}
+
+.search-card {
+    padding: 1em;
 }
 
 .nav-button:hover {
@@ -126,7 +135,7 @@ body {
     display: block;
     padding-top:2rem;
     position:relative;
-    left:-8em;
+    float:right;
 }
 
 .pfp-lg {
@@ -141,18 +150,16 @@ body {
     background-color: white;
     border-radius:10px;
     padding:1.5rem;
-    left: 50%;
-    right: 50%;
+    float:right;
+    width: 14rem;
 }
 
 .card img {
-    max-width:100% !important;
     max-height:20rem !important;
 }
 
 .post-container {
     position:relative;
-    left:-7em;
 }
 
 .post-container .row {
@@ -179,8 +186,6 @@ body {
 }
 
 .message-col {
-    position:absolute;
-    right:5.5em;
     margin-top:2em;
     height:100vw;
 }
@@ -230,7 +235,7 @@ body {
 }
 
 .reply-col .card {
-    width: unset !important;
+    width: 46rem !important;
     border-radius: 0px;
     display:block !important;
 }
@@ -263,15 +268,24 @@ body {
         width:100% !important;
         min-width: 100% !important;
         display:block;
-        padding:none;
+        padding:0;
     }
 
     .container-fluid {
-        padding:none;
+        padding:0 !important;
     }
 
     .post-container {
         position:static;
+        width: 100% !important;
+        padding:0.25rem !important
+    }
+    .jumbotron {
+        padding: 0.5rem !important
+    }
+
+    .message-col {
+        display:none;
     }
 }
 
@@ -411,9 +425,12 @@ body {
     border: none;
     max-height: 45rem;
     display: block;
-    margin-left: 11%;
-    width: 55px;
-    transition:0.5s;
+    /* margin-left: 11%; */
+    /* width: 55px; */
+    padding: 0;
+    transition: 0.5s;
+    margin-right: auto;
+    margin-left: auto;
 }
 
 .dm-button.active .pfp-md{
@@ -425,7 +442,8 @@ body {
 .convo {
     margin: 0px;
     border: none !important;
-    width: 24rem;
+    /* width: 24rem; */
+    height: 20rem;
 }
 
 .dm-card {
@@ -436,13 +454,15 @@ body {
     height:100%;
     padding-top:0;
     margin-top: 0;
+    margin: 0;
 }
 
 .dm-card .col-2 {
     border-right: 1px solid rgb(200,200,200);
     height: 100%;
     min-height: 100%;
-    padding-top: 0.5rem;
+    padding: 0.5rem;
+    width: unset !important;
 }
 
 .dm-card .col-10 {

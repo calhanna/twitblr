@@ -23,9 +23,6 @@
     <!-- Global Stylesheet -->
     <link rel="stylesheet" href="{{url_for('static', filename='../static/global.css')}}">
 
-    <!-- CKEditor -->
-    <script src="https://cdn.ckeditor.com/ckeditor5/38.0.1/classic/ckeditor.js"></script>
-
     <link href="https://cdn.quilljs.com/1.0.0/quill.snow.css" rel="stylesheet" />
     <script src="https://cdn.quilljs.com/1.0.0/quill.js"></script>
 
@@ -42,7 +39,7 @@
     <div class="jumbotron p-5">
         <h1 class="big-title">{% block display_title %}{% endblock %}</h1>
     </div>
-    <div class="container mx-auto">
+    <div class="container-fluid">
         <div class="row mx-auto">
             <div class="col-3" id="nav-col">
                 <div class="sticky-top mx-auto">
@@ -51,11 +48,12 @@
                     {% endblock %}
                 </div>
             </div>
-            <div class="col-9 p-4 post-container">
+            <div class="col-6 p-4 post-container">
                 {% block main_content %}
                 {% endblock %}
             </div>
             <div class="col-3 message-col" id="message-col">
+            {% block conversations %}
                 <!-- This contains the user's direct messages, and possibly other conversations eventually. -->
                 <div class="card sticky-top dm-card">
                     <div class="card-title dm-header">
@@ -105,6 +103,7 @@
                         </div>
                     </div>
                 </div>
+            {% endblock %}
             </div>
         </div>
     </div>

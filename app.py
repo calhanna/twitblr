@@ -542,6 +542,17 @@ def logout():
     g.user = None
     return redirect(url_for('auth.login'))
 
+@app.route('/search', methods=["POST"])
+def search():
+    with db.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM tblusers"
+        )
+        users = cursor.fetchall()
+        username_list = [user[1] for user in users]
+
+    return render_template('/blog/dash.html', posts=posts, username_list = username_list, activated_posts=check_user_likes())
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ["png", "jpg", "jpeg", "jfif", "webp"]
 

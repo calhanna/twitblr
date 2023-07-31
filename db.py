@@ -9,12 +9,12 @@ import pymysql
 def create_connection():
     try:
         return pymysql.connect(
-            host="localhost",
-            user="root",
+            host="10.0.0.17",
+            user="calhanna",
             # host="localhost",
             # user="root",
             password="ALBUM",
-            db="twitblr",
+            db="calhanna",
             charset="utf8mb4",
             cursorclass=pymysql.cursors.Cursor
         )

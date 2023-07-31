@@ -118,6 +118,13 @@
 {% endblock %}
 
 {% block main_content %}
+    <div class="card search-card">
+        <form class="search-form" action={{'url_for("search")'}}>
+            <input type="text">
+            <input type="submit">
+        </form>
+    </div>
+
     <div class="posts">
         {% for post in posts %}
             {{ macros.display_post(post, activated_posts) }}
@@ -138,6 +145,12 @@
             </div>
         {% endfor %}
     </div>
+{% endblock %}
+
+{% block conversations %}
+    {% if g.user != None %}
+        {{ super() }}
+    {% endif %}
 {% endblock %}
 
 {% block scripts %}
