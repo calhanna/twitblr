@@ -1,15 +1,39 @@
+body {
+	background-size: cover;
+    min-height: 100% !important;
+}
+
+#options-gear {
+    color:white;
+    top: 1em;
+    left: 1em;
+    position:fixed;
+}
+
+#options-gear:hover .fa-gear{
+    animation-name: spin;
+    animation-duration:2s;
+    cursor:pointer;
+}
+
+#options-gear .fa-gear{
+    font-size: xx-large;
+}
+
 .pfp {
 	width:30px;
 	height:30px;
 	border-radius:15px;
 }
 
-body {
-	min-height: 100% !important;
-}
-
 .container {
     display:-webkit-box;
+}
+
+.md-message {
+    color:white;
+    text-align:center;
+    width: 100%;
 }
 
 .reply-form .ql-picker-options{
@@ -344,7 +368,7 @@ a {
 
 .sticky-top {
 	z-index:1 !important;
-    top:0.5rem !important;
+    top: 0.5rem;
 }
 
 .overlay {
@@ -376,12 +400,6 @@ a {
 .no-display-none {
     display:unset !important;
 }
-
-body {
-	background: url('../static/assets/backgrounds/1920px-M104_ngc4594_sombrero_galaxy_hi-res.jpg') no-repeat center center fixed;
-	background-size: cover
-}
-
 .align-items-center {
 	min-height:50vh !important;
 }
@@ -467,4 +485,14 @@ body {
 
 .dm-card .col-10 {
     padding:0;
+}
+
+@keyframes spin {
+    0% {
+        transform:rotate(0deg);
+    }
+
+    100% {
+        transform:rotate(360deg);
+    }
 }

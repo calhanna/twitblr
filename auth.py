@@ -104,8 +104,6 @@ def login():
         else:
             return jsonify({'error': error, 'redirect': ""})
 
-
-
 @bp.route('/sign_out', methods=('GET', 'POST'))
 def sign_out():
     g.user = None

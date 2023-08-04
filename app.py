@@ -8,6 +8,7 @@ Notes to self:
 """
 
 from concurrent.futures import process
+from email.policy import default
 from flask import (
     Flask, 
     render_template, 
@@ -26,6 +27,11 @@ import auth #type: ignore
 from db import get_db #type: ignore
 
 from PIL import Image
+
+DEFAULT_SETTINGS = {
+    'theme': 'light',
+    'background-image': "galaxy.jpg"
+}
 
 # App initialisation
 app = Flask(__name__)
@@ -62,8 +68,8 @@ def page_not_found(e):
     return render_template('oopsie.html'), 500
 
 @app.context_processor
-def inject_conversations():
-    return dict(conversations=fetch_conversations())
+def inject():
+    return dict(conversations=fetch_conversations(), user_settings=get_user_settings())
 
 def check_likes(cursor, post):
     """ 
@@ -158,8 +164,6 @@ def dashboard():
     """ Fetches posts from database and displays on a feed """
     db = get_db()
     session['url'] = url_for("dashboard")
-
-    print(g.user)
 
     with db.cursor() as cursor:
 
@@ -536,14 +540,9 @@ def update_post():
 
     return jsonify({'content':content})
 
-@app.route("/logout", methods=["GET"])
-def logout():
-    session.clear()
-    g.user = None
-    return redirect(url_for('auth.login'))
-
-@app.route('/search', methods=["POST"])
+@app.route('/search', methods=["GET", "POST"])
 def search():
+    db = get_db()
     with db.cursor() as cursor:
         cursor.execute(
             "SELECT * FROM tblusers"
@@ -551,11 +550,72 @@ def search():
         users = cursor.fetchall()
         username_list = [user[1] for user in users]
 
-    return render_template('/blog/dash.html', posts=posts, username_list = username_list, activated_posts=check_user_likes())
+    query = "%{0}%".format(request.form['query'])
+
+    print('SELECT * FROM tblpost WHERE content like "%%%s%%";' % (query))
+
+    with db.cursor() as cursor:
+        cursor.execute(
+            'SELECT * FROM tblpost WHERE content like "{0}";'.format(query)
+        )
+        posts = cursor.fetchall()
+    
+        posts = [list(post) for post in posts]  # We want to edit the post and tuples can't be edited
+        posts.reverse()
+
+        for post in posts:
+            
+            post = fetch_post(post, cursor)
+
+            # Fetch replies
+            checked = []
+            replies = fetch_replies(post, cursor, checked)
+
+            post.append(replies)
+
+    return render_template('/search.html', posts=posts, username_list = username_list, activated_posts=check_user_likes())
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ["png", "jpg", "jpeg", "jfif", "webp"]
 
+@app.route('/options', methods=["GET", "POST"])
+def options():
+    if request.method == "POST":
+        db = get_db()
+        user_settings = {}
+        for key in request.form.keys():
+            # Check that this actually changes from the default settings. We only want to store the changes we have to in order to save space. The second condition is required to allow the user to switch back to the default settings
+            if request.form[key] != DEFAULT_SETTINGS[key] or (key in get_user_settings().keys() and request.form[key] != get_user_settings()[key]):
+                user_settings[key] = request.form[key]
+
+        with db.cursor() as cursor:
+            for key in user_settings.keys():
+                sql = """
+                    INSERT INTO `tblsettings` (`user_id`, `key`, `value`) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE `value` = %s
+                """
+                cursor.execute(sql, (g.user[0], key, user_settings[key], user_settings[key]))
+            db.commit()
+
+    return render_template('options.html')
+
+def get_user_settings():
+    if g.user == None:
+        return DEFAULT_SETTINGS
+
+    db = get_db()
+    with db.cursor() as cursor:
+        sql = """
+            SELECT `key`, `value` FROM tblsettings WHERE user_id = %s
+        """
+        cursor.execute(sql, g.user[0])
+        user_settings = dict(cursor.fetchall())
+    
+    for key in DEFAULT_SETTINGS.keys():
+        if key not in user_settings.keys():
+            user_settings[key] = DEFAULT_SETTINGS[key]
+
+    return user_settings
+    
 if __name__ == '__main__':
     import os
     HOST = os.environ.get('SERVER_HOST', 'localhost')

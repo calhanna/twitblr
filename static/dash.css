@@ -12,6 +12,10 @@
     width: 43.55rem;
 }
 
+.search-form input[type="text"] {
+    width: 80%;
+}
+
 .row.p-2 {
     margin-top:-0.75rem !important;
     position:relative;

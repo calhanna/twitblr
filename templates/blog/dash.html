@@ -118,11 +118,15 @@
 {% endblock %}
 
 {% block main_content %}
-    <div class="card search-card">
-        <form class="search-form" action={{'url_for("search")'}}>
-            <input type="text">
-            <input type="submit">
-        </form>
+    <div class="row">
+        <div class="col-lg-12 p-2 d-flex">
+            <div class="card mx-auto search-card">
+                <form class="search-form" action={{url_for("search")}} method="POST">
+                    <input type="text" name="query">
+                    <input type="submit">
+                </form>
+            </div>
+        </div>
     </div>
 
     <div class="posts">

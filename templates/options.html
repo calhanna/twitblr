@@ -1,0 +1,65 @@
+{% extends "./base.html"%}
+
+{% block head %}
+    {{ super() }}
+    <!-- Local Stylesheet -->
+    <link rel="stylesheet" href="{{url_for('static', filename='options.css')}}">
+{% endblock %}
+
+{% block display_title %}Options{% endblock %}
+
+{% block nav_content %}
+    {% if g.user != None %}
+        <div class="prof-card mx-auto justify-content-center">
+            <div class="pfp-container">
+                <img src="{{url_for('static', filename=g.user[4].strip('.'))}}" class="pfp-lg card-image-top"/>
+            </div>
+            <br>
+            <h5 class="card-title">{{g.user[1]}}</h5>
+            <a href={{url_for('profile', user=g.user[0])}} class="btn btn-primary">Profile</a>
+            <a href="{{url_for('auth.sign_out')}}" class="btn min-button"><i class="fa fa-sign-out"></i></a>
+        </div>
+    {% else %}
+        <button class="nav-button login-button" onclick="Display_Overlay()"> Sign In </button>
+    {% endif %}
+    <div class="side-nav">
+    <!-- Navigation Buttons -->
+    <!--
+    <a class="nav-button" href="{{url_for('create_post', reply_id=0)}}">Create Post</a>
+    -->
+    </div>
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-lg-12 p-2 d-flex">
+        <div class="card option-card">
+            <div class="card-title">
+                <h4> Appearance </h4>
+            </div>
+            <div class="card-body">
+                <form id="appearance" method="POST">
+                    <div class="row mx-auto">
+                        <div class="col-3">
+                            <h4> Theme </h4>
+                        </div>
+                        <div class="col-9">
+                            <input type="radio" name="theme" value="light">
+                            <input type="radio" name="theme" value="dark">
+                            <input type="radio" name="theme" value="mint">
+                            <input type="radio" name="theme" value="neon">
+                        </div>
+                    </div>
+                    <div class="row mx-auto">
+                        <input type="submit">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+{% endblock %}

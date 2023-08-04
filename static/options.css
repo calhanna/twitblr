@@ -1,0 +1,61 @@
+:root {
+    --form-control-color: rebeccapurple;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+.option-card .card-title {
+    border-bottom: 1px solid rgba(25,25,25,0.25);
+    padding: 0.5rem;
+    padding-left: 2em;
+}
+
+#appearance button {
+    border: 1px solid gray;
+    width: 2em;
+    height: 2em;
+    border-radius: 5px;
+}
+
+input[type="radio"] {
+    appearance: none;
+    margin: 0;
+    font: inherit;
+    width: 2em;
+    height: 2em;
+    border: 0.15em solid gray;
+    border-radius: 25%;
+}
+
+input[type="radio"]:checked {
+    border-color: blue;
+}
+
+input[value="light"] {
+    background-color: white;
+}
+
+input[value="dark"] {
+    background-color: rgb(50, 50, 50);
+}
+
+input[value="mint"] {
+    background-color: #163a22;
+}
+
+input[value="neon"] {
+    background-color: palevioletred;
+}
+
+.option-card .row {
+    width: 75%;
+    align-items: center;
+}
+
+.selected {
+    border: 1px solid blue !important;
+}

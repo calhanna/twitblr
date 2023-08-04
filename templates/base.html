@@ -4,6 +4,12 @@
 <head>
     {% block head %}
 
+    <style>
+        body {
+            background: url('{{url_for("static", filename="/assets/backgrounds/" + user_settings["background-image"])}}') no-repeat center center fixed;
+        }
+    </style>
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title></title>
@@ -25,6 +31,8 @@
 
     <link href="https://cdn.quilljs.com/1.0.0/quill.snow.css" rel="stylesheet" />
     <script src="https://cdn.quilljs.com/1.0.0/quill.js"></script>
+
+    <link rel="stylesheet" href={{url_for('static', filename='./themes/' + user_settings['theme'] + '.css')}}
 
     {% endblock %}
 </head>
@@ -108,6 +116,7 @@
         </div>
     </div>
 </div>
+<a id="options-gear" href={{url_for('options')}}><i class="fa fa-gear"></i></a>
 </body>
 
 {% block scripts %}

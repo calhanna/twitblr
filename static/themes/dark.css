@@ -1,0 +1,24 @@
+.card, .prof-card, .nav-button {
+    background-color: rgb(50, 50, 50);
+    border-color: rgb(25,25,25)
+}
+
+.card-title, .fa, .card-body, .action-link, .nav-button {
+    color: white;
+}
+
+.activated, .activated .fa {
+    color: rgb(187, 134, 252) !important;
+}
+
+.dm-header, .dm-card .col-2, .convo-title, .btn-primary {
+    border-color: rgb(25,25,25) !important;
+}
+
+.outgoing .message-body, .btn-primary, .btn-primary:visited {
+    background-color: rgb(187, 134, 252);
+}
+
+.btn-primary:active {
+    background-color: rgb(107, 54, 172);
+}
