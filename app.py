@@ -1,10 +1,6 @@
 """
 This script runs the application using a development server.
 It contains the definition of routes and views for the application.
-
-Notes to self:
-- HTML/css needs work, doesnt look nice on mobile
-- Prioritory is login/register rn
 """
 
 from concurrent.futures import process
@@ -25,12 +21,17 @@ import re, os, markupsafe, datetime, random
 
 import auth #type: ignore
 from db import get_db #type: ignore
+from emailer import send_message #type: ignore
 
 from PIL import Image
 
 DEFAULT_SETTINGS = {
     'theme': 'light',
-    'background-image': "galaxy.jpg"
+    'background-image': "galaxy.jpg",
+    'header-colour': '#FFFFFF',
+    'analytics': True,
+    'sorting': 0,
+    'allow_dms': True
 }
 
 # App initialisation
@@ -69,7 +70,7 @@ def page_not_found(e):
 
 @app.context_processor
 def inject():
-    return dict(conversations=fetch_conversations(), user_settings=get_user_settings())
+    return dict(conversations=fetch_conversations(), user_settings=get_user_settings(), notifications=get_notifications())
 
 def check_likes(cursor, post):
     """ 
@@ -322,6 +323,9 @@ def delete_post(post_id):
 def profile(user):
     db = get_db()
 
+    if g.user is None:
+        return redirect(url_for('dashboard'))
+
     user = int(user)
 
     session['url'] = url_for("profile", user=user)
@@ -364,7 +368,7 @@ def profile(user):
                 )
             db.commit()
 
-            return redirect(url_for("profile"))
+            return redirect(url_for("profile", user=g.user[0]))
         
     with db.cursor() as cursor:
         cursor.execute("SELECT * FROM tblusers WHERE id = %s", (user))
@@ -580,25 +584,45 @@ def allowed_file(filename):
 
 @app.route('/options', methods=["GET", "POST"])
 def options():
+    """ Manages user options, checking against the default values and saving to tblsettings """
+
+    db = get_db()
     if request.method == "POST":
-        db = get_db()
-        user_settings = {}
-        for key in request.form.keys():
-            # Check that this actually changes from the default settings. We only want to store the changes we have to in order to save space. The second condition is required to allow the user to switch back to the default settings
-            if request.form[key] != DEFAULT_SETTINGS[key] or (key in get_user_settings().keys() and request.form[key] != get_user_settings()[key]):
-                user_settings[key] = request.form[key]
+        if request.form['id'] != 'account':
+            user_settings = {}
+            for key in request.form.keys():
+                if key == 'id':
+                    continue
+                # Check that this actually changes from the default settings. We only want to store the changes we have to in order to save space. The second condition is required to allow the user to switch back to the default settings
+                if request.form[key] != DEFAULT_SETTINGS[key] or (key in get_user_settings().keys() and request.form[key] != get_user_settings()[key]):
+                    user_settings[key] = request.form[key]
 
-        with db.cursor() as cursor:
-            for key in user_settings.keys():
-                sql = """
-                    INSERT INTO `tblsettings` (`user_id`, `key`, `value`) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE `value` = %s
-                """
-                cursor.execute(sql, (g.user[0], key, user_settings[key], user_settings[key]))
-            db.commit()
+            with db.cursor() as cursor:
+                for key in user_settings.keys():
+                    sql = """
+                        INSERT INTO `tblsettings` (`user_id`, `key`, `value`) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE `value` = %s
+                    """     # Insert a record if the setting hasn't been changed before, otherwise update the old record.
+                    cursor.execute(sql, (g.user[0], key, user_settings[key], user_settings[key]))
+                db.commit()
+        else:
+            with db.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE tblusers SET `username`=%s WHERE id = %s", (request.form['username'], g.user[0])
+                )
+                db.commit()
 
-    return render_template('options.html')
+    with db.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM tblusers"
+        )
+        users = cursor.fetchall()
+        username_list = [user[1] for user in users]
+
+    return render_template('options.html', username_list = username_list)
 
 def get_user_settings():
+    """ Returns a dictionary containing all of the user's current settings. If they haven't changed a setting, we use it's default value. """
+
     if g.user == None:
         return DEFAULT_SETTINGS
 
@@ -615,6 +639,39 @@ def get_user_settings():
             user_settings[key] = DEFAULT_SETTINGS[key]
 
     return user_settings
+
+def get_notifications():
+    if g.user == None:
+        return []
+    
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute("SELECT message FROM tblnotifications WHERE user_id = %s", (g.user[0]))
+        return cursor.fetchall()
+
+@app.route('/delete_account', methods=["GET"])
+def delete_account():
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute("DELETE FROM tblusers WHERE id = %s", (g.user[0]))
+        db.commit()
+
+    return redirect(url_for('index'))
+
+@app.route("/confirm_email")
+def confirm_email():
+    """ Changes a 1 to a 0. Has no other effect """
+
+    db = get_db()
+    if g.user is None: 
+        return redirect(url_for('dashboard'))
+    
+    with db.cursor() as cursor:
+        cursor.execute("UPDATE tblusers SET `confirmed`=1 WHERE email = %s", (g.user[3]))
+        db.commit()
+
+    return redirect(url_for('dashboard'))
+
     
 if __name__ == '__main__':
     import os

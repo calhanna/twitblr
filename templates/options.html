@@ -1,5 +1,7 @@
 {% extends "./base.html"%}
 
+{% import "./macros.html" as macros %}
+
 {% block head %}
     {{ super() }}
     <!-- Local Stylesheet -->
@@ -27,6 +29,7 @@
     <!--
     <a class="nav-button" href="{{url_for('create_post', reply_id=0)}}">Create Post</a>
     -->
+    <a class="nav-button" href="{{url_for('dashboard')}}">Dashboard</a>
     </div>
 {% endblock %}
 
@@ -39,15 +42,37 @@
             </div>
             <div class="card-body">
                 <form id="appearance" method="POST">
+                    <input class="hidden" name="id" value="appearance">
                     <div class="row mx-auto">
-                        <div class="col-3">
+                        <div class="col-5">
                             <h4> Theme </h4>
                         </div>
-                        <div class="col-9">
-                            <input type="radio" name="theme" value="light">
-                            <input type="radio" name="theme" value="dark">
-                            <input type="radio" name="theme" value="mint">
-                            <input type="radio" name="theme" value="neon">
+                        <div class="col-7">
+                            {{ macros.create_radio_button('theme', 'light', user_settings) }}
+                            {{ macros.create_radio_button('theme', 'dark', user_settings) }}
+                            {{ macros.create_radio_button('theme', 'mint', user_settings) }}
+                            {{ macros.create_radio_button('theme', 'neon', user_settings) }}
+                        </div>
+                    </div>
+                    <div class="row mx-auto">
+                        <div class="col-5">
+                            <h4> Background Image </h4>
+                        </div>
+                        <div class="col-7">
+                            {{ macros.create_radio_button('background-image', 'galaxy.jpg', user_settings) }}
+                            {{ macros.create_radio_button('background-image', 'jelly.jpg', user_settings) }}
+                            {{ macros.create_radio_button('background-image', 'kitty.jpg', user_settings) }}
+                            {{ macros.create_radio_button('background-image', 'lightning.jpg', user_settings) }}
+                            {{ macros.create_radio_button('background-image', 'lounge.jpg', user_settings) }}
+                            {{ macros.create_radio_button('background-image', 'vaporwave.jpg', user_settings) }}
+                        </div>
+                    </div>
+                    <div class="row mx-auto">
+                        <div class="col-5">
+                            <h4> Header Colour </h4>
+                        </div>
+                        <div class="col-7">
+                            <input type="color" name="header-colour" value="{{user_settings['header-colour']}}">
                         </div>
                     </div>
                     <div class="row mx-auto">
@@ -58,8 +83,127 @@
         </div>
     </div>
 </div>
+<div class="row">
+    <div class="col-lg-12 p-2 d-flex">
+        <div class="card option-card">
+            <div class="card-title">
+                <h4> Account </h4>
+            </div>
+            <div class="card-body">
+                <form id="account" method="POST">
+                    <input class="hidden" name="id" value="account">
+                    <div class="row mx-auto">
+                        <div class="col-5">
+                            <h4> Username </h4>
+                        </div>
+                        <div class="col-7">
+                            <input type="text" id="username" name="username" value="{{g.user[1]}}" oninput="Validate_Username()" onfocus="Show_Feedback('username'); Validate_Username()" onfocusout="Hide_Feedback('username')">
+                            <p id="username-feedback" class="feedback-hidden feedback-message" >Username unchanged</p>
+                        </div>
+                    </div>
+                    <div class="row mx-auto">
+                        <div class="col-5">
+                            <h4> Password </h4>
+                        </div>
+                        <div class="col-7">
+                            <button class="password-changer">Change</button>
+                        </div>
+                    </div>
+                    <div class="row mx-auto">
+                        <input type="submit">
+                    </div>
+                </form>
+                <form id="delete" action={{url_for('delete_account')}} type="GET">
+                    <input type="submit" class="delete-button" value="Delete Account">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 {{super()}}
+<script>
+    $('#delete').submit(function(e) {
+        if (confirm('Are you sure?') == false) {
+            e.preventDefault()
+        }
+    })
+    
+    // Copied these from the dashboard page to facillitate username/password changing
+    function Validate_Username() {
+        // Check username against list of used names, provided through Jinja. Also make sure there is a username
+        
+        var username_list = eval('{{username_list|tojson}}');
+        var username = document.getElementById('username')
+        var feedback = document.getElementById("username-feedback")
+        
+        if (username.value.length == 0) {
+            feedback.style.color = "red";
+            feedback.innerHTML = "Please fill out this field"
+        } else if (username.value == "{{g.user[1]}}") {
+            feedback.style.color = "unset"
+            feedback.innerHTML = "Username unchanged"
+        } else {
+            if (username_list.includes(username.value)) {
+                feedback.style.color = "red";
+                feedback.innerHTML = "Username already taken";
+            } else {
+                feedback.style.color = "green";
+                feedback.innerHTML = "Username is unique";
+            }
+        }
+    }
+
+    function Validate_Password() {
+        // Validates each individual criteria
+
+        var feedback_elements = document.getElementsByClassName("password-feedback");
+        var password = document.getElementById("password")
+        
+        // Validate length
+        if (password.value.length >= 8) {
+            feedback_elements[0].style.color = "green"
+        } else {
+            feedback_elements[0].style.color = "red"
+        }
+
+        // Validate capitals
+        if (/[A-Z]/.test(password.value)) {
+            feedback_elements[1].style.color = "green"
+        } else {
+            feedback_elements[1].style.color = "red"
+        }
+
+        // Validate number
+        if (/\d/.test(password.value)) {
+            feedback_elements[2].style.color = "green"
+        } else {
+            feedback_elements[2].style.color = "red"
+        }
+    }
+
+    function Show_Feedback(feedback_id) {
+        var feedback = document.getElementById(feedback_id + '-feedback');
+        feedback.classList.remove('feedback-hidden')
+    }
+
+    function Hide_Feedback(feedback_id) {
+        var feedback = document.getElementById(feedback_id + '-feedback');
+        feedback.classList.add('feedback-hidden')
+    }
+
+    $('.password-changer').on("click", function(e) {
+        $.ajax(
+            {
+                data: {},
+                type: "POST",
+                url: "{{url_for('auth.change_password', email='none')}}"
+            }
+        )
+        this.disabled = true
+        e.preventDefault()
+    });
+</script>
 {% endblock %}

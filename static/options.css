@@ -29,6 +29,7 @@ input[type="radio"] {
     height: 2em;
     border: 0.15em solid gray;
     border-radius: 25%;
+    background-size:cover;
 }
 
 input[type="radio"]:checked {
@@ -51,6 +52,30 @@ input[value="neon"] {
     background-color: palevioletred;
 }
 
+input[value="galaxy.jpg"] {
+    background-image: url('assets/backgrounds/galaxy.jpg')
+}
+
+input[value="jelly.jpg"] {
+    background-image: url('assets/backgrounds/jelly.jpg')
+}
+
+input[value="kitty.jpg"] {
+    background-image: url('assets/backgrounds/kitty.jpg')
+}
+
+input[value="lightning.jpg"] {
+    background-image: url('assets/backgrounds/lightning.jpg')
+}
+
+input[value="lounge.jpg"] {
+    background-image: url('assets/backgrounds/lounge.jpg')
+}
+
+input[value="vaporwave.jpg"] {
+    background-image: url('assets/backgrounds/vaporwave.jpg')
+}
+
 .option-card .row {
     width: 75%;
     align-items: center;
@@ -58,4 +83,27 @@ input[value="neon"] {
 
 .selected {
     border: 1px solid blue !important;
+}
+
+.delete-button {
+    background-color:red;
+    border:none;
+    border-radius:1em;
+    color: white;
+    padding:0.5em;
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.feedback-hidden {
+    max-height:0px !important;
+    transition:0.5s;
+}
+
+.feedback-message {
+    margin-bottom:0px;
+    transition:0.5s;
+    overflow:hidden;
+    max-height:100px;
+    width:120%;
 }

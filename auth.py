@@ -6,6 +6,48 @@ from flask import (
 import hashlib
 
 from db import get_db #type:ignore
+from emailer import send_message #type:ignore
+
+CONFIRM_MESSAGE = """\
+    <style>
+        h1, h3{
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        p {
+            margin-top: 50px
+        }
+    </style>
+
+    <body style="text-align: center">
+        <h1> Confirm your email </h1> <br>
+        <h3>Hi, %s. To complete your account creation process, please click this link to confirm your email: </h3> <br>
+        <h3><a href = "%s" >Confirm</a></h3> <br>
+        <p> If this wasn't you, please contact us at our main site to resolve </p>
+    </body>
+"""
+
+PASSWORD_CHANGE = """\
+    <style>
+        h1, h3{
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        p {
+            margin-top: 50px
+        }
+    </style>
+
+    <body style="text-align: center">
+        <h1> Change your password </h1> <br>
+        <h3>Hi, %s. We have recieved a request to change your password. Please click the link below to do so. </h3> <br>
+        <h3><a href = "%s" >Change Password</a></h3> <br>
+        <p> If this wasn't you, sign out on all devices and click the link to change your password. </p>
+    </body>
+"""
+
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -70,6 +112,7 @@ def register():
                 user = cursor.fetchone()
                 session.clear()
                 session['user_id'] = user[0]
+                send_message(email, "Confirm your email", CONFIRM_MESSAGE % (username, url_for('confirm_email', _external=True)))
             except db.IntegrityError as e:
                 # According to flask docs this exception will catch when a username is taken. Doesn't work here because I don't use the username as the primary key.
                 print(e)
@@ -122,3 +165,43 @@ def load_logged_in_user():
             'SELECT * FROM tblusers WHERE id = %s', (user_id,)
         )
         g.user = cursor.fetchone()
+
+@bp.route('/change_password/<email>', methods=["GET", "POST"])
+def change_password(email):
+    """ Does 3 things:
+    1. Sends the change password email
+    2. Displays the change password page when the email link is clicked
+    3. Changes the user's password
+    """
+
+    db = get_db()
+    if request.method == "POST" and email == "none":
+        # Send password request email
+        send_message(g.user[3], "Change your password", PASSWORD_CHANGE % (g.user[1], url_for('auth.change_password', _external=True, email=g.user[3])))
+
+        with db.cursor() as cursor:
+            # Record request
+            cursor.execute("INSERT INTO tblactions (user_id, type) VALUES (%s, 'ChangePassword')", (g.user[0]))
+            db.commit()
+
+        return jsonify({})
+    elif request.method == "POST":
+        if email != g.user[3]:
+            # signed in as wrong user, go away
+            return redirect(url_for('dashboard'))
+        
+        with db.cursor() as cursor:
+            # Changes the password and expires the record
+            cursor.execute("UPDATE tblusers SET password=%s WHERE email=%s", (hashlib.sha256(bytes(request.form["password"], 'utf-8')).hexdigest(), email))
+            cursor.execute("DELETE FROM tblactions WHERE user_id = %s AND type='ChangePassword'", (g.user[0]))
+            db.commit()
+
+        return redirect(url_for('dashboard'))
+    else:
+        with db.cursor() as cursor:
+            cursor.execute("SELECT * FROM tblactions INNER JOIN tblusers ON tblactions.user_id = tblusers.id WHERE email = %s and type='ChangePassword'", (g.user[3]))
+            if cursor.fetchall():
+                # Only display page if there is an unexpired request.
+                return render_template("/auth/change_password.html")
+            else:
+                return redirect(url_for('dashboard'))

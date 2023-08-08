@@ -1,10 +1,10 @@
 .card, .prof-card, .nav-button, .ql-picker-options {
-    background-color: rgb(50, 50, 50) !important;
-    border-color: rgb(25,25,25)
+    background-color: #feafd6 !important;
+    border-color: #56018c
 }
 
 .card-title, .fa, .card-body, .action-link, .nav-button, .ql-toolbar span {
-    color: white;
+    color: #56018c;
 }
 
 .ql-stroke {
@@ -20,7 +20,7 @@
 }
 
 .dm-header, .dm-card .col-2, .convo-title, .btn-primary, #post-body, .ql-toolbar, .ql-container {
-    border-color: rgb(25,25,25) !important;
+    border-color: #56018c !important;
 }
 
 .outgoing .message-body, .btn-primary, .btn-primary:visited {

@@ -1,0 +1,32 @@
+.card, .prof-card, .nav-button, .ql-picker-options{
+    background-color: rgb(10,58,42) !important;
+    border-color: rgb(0,48,32)
+}
+
+.card-title, .fa, .card-body, .action-link, .nav-button, .ql-toolbar span{
+    color: 	rgb(90,161,127);
+}
+
+.ql-stroke {
+    stroke: rgb(90,161,127) !important;
+}
+
+.ql-fill {
+    fill: rgb(90,161,127) !important
+}
+
+.activated, .activated .fa {
+    color: rgb(19,122,99) !important;
+}
+
+.dm-header, .dm-card .col-2, .convo-title, .btn-primary, #post-body, .ql-toolbar, .ql-container {
+    border-color: rgb(0,48,32) !important;
+}
+
+.outgoing .message-body, .btn-primary, .btn-primary:visited {
+    background-color: rgb(19,122,99);
+}
+
+.btn-primary:active {
+    background-color: rgb(19,122,99);
+}

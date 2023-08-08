@@ -45,7 +45,7 @@
     </div>
     
     <div class="jumbotron p-5">
-        <h1 class="big-title">{% block display_title %}{% endblock %}</h1>
+        <h1 class="big-title" style="color: {{user_settings['header-colour']}}">{% block display_title %}{% endblock %}</h1>
     </div>
     <div class="container-fluid">
         <div class="row mx-auto">
@@ -116,7 +116,16 @@
         </div>
     </div>
 </div>
-<a id="options-gear" href={{url_for('options')}}><i class="fa fa-gear"></i></a>
+{% if g.user != None %}
+    <a id="options-gear" href={{url_for('options')}}><i class="fa fa-gear"></i></a>
+{% endif %}
+<div class="notifaction-box">
+    {% for notification in notifications %}
+        <div class="notification card">
+            <h3>{{notification}}</h3>
+        </div>
+    {% endfor%}
+</div>
 </body>
 
 {% block scripts %}

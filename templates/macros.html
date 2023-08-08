@@ -1,23 +1,25 @@
 {% macro reply_editor(post) -%}
 <div class="row minimised p-2 reply-row" id="reply-row{{post[0]}}">
-    <div class="card reply-editor">
-        <form class="reply-form {{post[0]}}" >
-            <!-- Quill Editor -->
-            <div oninput='ValidatePost()' id="post-body{{post[0]}}" name="postContent" required></div>
-            <div id="toolbar{{post[0]}}">
-                <span id="counter" style="color:green">0/255</span> 
-                <span class="ql-formats">
-                    <button class="ql-bold"></button>
-                    <button class="ql-italic"></button>
-                    <button class="ql-underline"></button>
-                    <button class="ql-strike"></button>
-                </span>
-                <span class="ql-formats">
-                    <select class="ql-align"></select>
-                </span>
-                <input id="post-submit" type="submit" value="Create Post">
-            </div>
-        </form>
+    <div class="col-lg-12 d-flex ">
+        <div class="card mx-auto reply-editor">
+            <form class="reply-form {{post[0]}}" >
+                <!-- Quill Editor -->
+                <div oninput='ValidatePost()' id="post-body{{post[0]}}" name="postContent" required></div>
+                <div id="toolbar{{post[0]}}">
+                    <span id="counter" style="color:green">0/255</span> 
+                    <span class="ql-formats">
+                        <button class="ql-bold"></button>
+                        <button class="ql-italic"></button>
+                        <button class="ql-underline"></button>
+                        <button class="ql-strike"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <select class="ql-align"></select>
+                    </span>
+                    <input id="post-submit" type="submit" value="Create Post">
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {%- endmacro %}
@@ -119,3 +121,7 @@
     </div>
 </div>
 {%- endmacro %}
+
+{% macro create_radio_button(key, value, user_settings, style) %}
+<input type="radio" name="{{key}}" value="{{value}}" style="{{style}}" {% if user_settings[key] == value%}checked{%endif%}>
+{% endmacro %}

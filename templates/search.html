@@ -37,13 +37,15 @@
 
 {% block main_content %}
     {{super()}}
-    <div class="container mx-auto" style="padding:5em">
-        <div class="row" style="width:100%">
-            <div class="col-lg-12 p-2 d-flex">
-                <h3 class="md-message"> It looks like there are no good results for your search. </h3>
+    {% if posts|length == 0 %}
+        <div class="container mx-auto" style="padding:5em">
+            <div class="row" style="width:100%">
+                <div class="col-lg-12 p-2 d-flex">
+                    <h3 class="md-message"> It looks like there are no good results for your search. </h3>
+                </div>
             </div>
         </div>
-    </div>
+    {% endif %}
 {% endblock %}
 
 {% block conversations %}
