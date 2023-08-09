@@ -110,6 +110,14 @@
                         </div>
                     </div>
                     <div class="row mx-auto">
+                        <div class="col-5">
+                            <h4> Email </h4>
+                        </div>
+                        <div class="col-7">
+                            <h5 class="inline">{{g.user[3]}}{% if g.user[6] != 1 %}       </h5><button class="confirm-email">Confirm</button>{% endif %}
+                        </div>
+                    </div>
+                    <div class="row mx-auto">
                         <input type="submit">
                     </div>
                 </form>
@@ -205,5 +213,17 @@
         this.disabled = true
         e.preventDefault()
     });
+
+    $('.confirm-email').on("click", function(e){
+        $.ajax(
+            {
+                data: {},
+                type: "POST",
+                url: "{{url_for('auth.confirm_email')}}"
+            }
+        )
+        this.disabled = true
+        e.preventDefault()
+    })
 </script>
 {% endblock %}

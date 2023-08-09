@@ -6,7 +6,7 @@ from flask import (
 import hashlib
 
 from db import get_db #type:ignore
-from emailer import send_message #type:ignore
+from emailer import send_email as send_message #type:ignore
 
 CONFIRM_MESSAGE = """\
     <style>
@@ -205,3 +205,8 @@ def change_password(email):
                 return render_template("/auth/change_password.html")
             else:
                 return redirect(url_for('dashboard'))
+
+@bp.route('/confirm_email', methods=["POST"])
+def confirm_email():
+    send_message(g.user[3], "Confirm your email", CONFIRM_MESSAGE % (g.user[1], url_for('confirm_email', _external=True)))
+    return jsonify({})

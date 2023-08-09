@@ -119,10 +119,11 @@
 {% if g.user != None %}
     <a id="options-gear" href={{url_for('options')}}><i class="fa fa-gear"></i></a>
 {% endif %}
-<div class="notifaction-box">
+<div class="notification-box">
     {% for notification in notifications %}
-        <div class="notification card">
-            <h3>{{notification}}</h3>
+        <div class="notification card {{notification[0]}}">
+            <h5 class="close-notification fa fa-times"></h5>
+            {{notification[1]|safe}}
         </div>
     {% endfor%}
 </div>
@@ -310,6 +311,7 @@
         let form_data = form.children('input').last().val()
         let classList = form.attr('class').split(/\s+/) // i hate jquery
         let convo_body = form.parent().prev() 
+        form.children('input').val("")
         $.ajax(
             {
                 data: {
@@ -323,7 +325,6 @@
         .done( function(result) {
             convo_body.append(result['html'])
             let latest_message = convo_body.children().last()
-            form.children('input').val("")
             convo_body.scrollTop(latest_message.offset().top)
         }
         )
@@ -391,6 +392,20 @@
         $('.convo[data-convo_id="' + $(this).attr('data-convo_child_id') +'"]').toggleClass("hidden")
         $('.convo[data-convo_id!="' + $(this).attr('data-convo_child_id') +'"]').addClass('hidden');
     })
+
+    $('.close-notification').on("click", function(e) {
+        this.parentElement.remove()
+        let id = this.parentElement.classList[2]
+        $.ajax({
+            data: {
+                notif_id: id
+            },
+            type: "POST",
+            url: "{{url_for('destroy_notification')}}"
+        })
+        e.preventDefault()
+    })
+
 </script>
 {% endblock %}
 

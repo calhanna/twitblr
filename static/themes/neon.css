@@ -3,7 +3,7 @@
     border-color: #56018c
 }
 
-.card-title, .fa, .card-body, .action-link, .nav-button, .ql-toolbar span {
+.card-title, .fa, .card-body, .action-link, .nav-button, .ql-toolbar span, .notification {
     color: #56018c;
 }
 

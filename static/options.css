@@ -8,6 +8,10 @@
   box-sizing: border-box;
 }
 
+.inline {
+    display: inline;
+}
+
 .option-card .card-title {
     border-bottom: 1px solid rgba(25,25,25,0.25);
     padding: 0.5rem;

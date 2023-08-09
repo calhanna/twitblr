@@ -14,7 +14,7 @@ APP_PASSWORD = os.getenv("APP_PASSWORD")
 def get_server():
     return smtplib.SMTP_SSL("smtp.gmail.com", PORT, context=CONTEXT)
 
-def send_message(reciever, subject, message_text):
+def send_email(reciever, subject, message_text):
     """ Sends an email from HelperBot through SSL """
 
     message = MIMEMultipart()

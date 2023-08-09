@@ -21,7 +21,7 @@ import re, os, markupsafe, datetime, random
 
 import auth #type: ignore
 from db import get_db #type: ignore
-from emailer import send_message #type: ignore
+from emailer import send_email #type:ignore
 
 from PIL import Image
 
@@ -34,6 +34,11 @@ DEFAULT_SETTINGS = {
     'allow_dms': True
 }
 
+# Notification Templates
+NEW_MESSAGE = """\
+    <h5>You have a new message from %s!</h5>
+"""
+
 # App initialisation
 app = Flask(__name__)
 app.config.from_mapping(SECRET_KEY='dev', UPLOAD_FOLDER="./static/userUploads/") # We need a secret key to access the session, and an upload folder to put user profile pictures
@@ -44,6 +49,15 @@ wsgi_app = app.wsgi_app
 
 # Blueprint for authentication functions
 app.register_blueprint(auth.bp)
+
+def readProfanities():
+    profanities = []
+    file = open('./static/profanity-list.txt','r')
+    for line in file:
+        line = line.strip()
+    return profanities
+  
+PROFANITIES = readProfanities()
 
 def get_current_time():
     """ Returns the current datetime formatted for MySQL """
@@ -524,6 +538,11 @@ def send_message():
     </div>
     """ % (convo_id, message_body, url_for('static', filename=g.user[4].strip('.')))
 
+    with db.cursor() as cursor:
+        cursor.execute("SELECT * FROM tblusers INNER JOIN tblconvo_users ON tblusers.id = tblconvo_users.user_id WHERE convo_id = %s AND id <> %s", (convo_id, g.user[0]))
+        for user in cursor.fetchall():
+            send_notification(user, NEW_MESSAGE % (g.user[1]))
+
     return jsonify({'html': message_html})
 
 @app.route('/refresh_conversation', methods=["GET"])
@@ -646,8 +665,24 @@ def get_notifications():
     
     db = get_db()
     with db.cursor() as cursor:
-        cursor.execute("SELECT message FROM tblnotifications WHERE user_id = %s", (g.user[0]))
+        cursor.execute("SELECT id, message FROM tblnotifications WHERE user_id = %s", (g.user[0]))
         return cursor.fetchall()
+
+def send_notification(user, message):
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute("INSERT INTO tblnotifications (user_id, message) VALUES (%s, %s)", (user[0], message))
+        db.commit()
+    send_email(user[3], message, message)
+
+@app.route('/destroy_notification', methods=["POST"])
+def destroy_notification():
+    notif_id = request.form['notif_id']
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute("DELETE FROM tblnotifications WHERE id = %s", (notif_id))
+        db.commit()
+    return jsonify({})
 
 @app.route('/delete_account', methods=["GET"])
 def delete_account():
@@ -671,6 +706,9 @@ def confirm_email():
         db.commit()
 
     return redirect(url_for('dashboard'))
+
+def profanity_check(txt):
+    pass
 
     
 if __name__ == '__main__':

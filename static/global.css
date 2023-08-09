@@ -487,6 +487,30 @@ a {
     padding:0;
 }
 
+.notification {
+    padding: 1em;
+}
+
+.notification-box {
+    padding:1em;
+    width:25%;
+    position:fixed;
+    bottom: 1em;
+    max-height: 30%;
+}
+
+.close-notification {
+    position: absolute;
+    right: 0.5em;
+    top: 0.25em;
+}
+
+.close-notification:hover {
+    cursor:pointer;
+    animation-name: spin;
+    animation-duration: 1s;
+}
+
 @keyframes spin {
     0% {
         transform:rotate(0deg);
