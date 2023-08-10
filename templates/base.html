@@ -119,6 +119,19 @@
 {% if g.user != None %}
     <a id="options-gear" href={{url_for('options')}}><i class="fa fa-gear"></i></a>
 {% endif %}
+
+<h1><a class="side-nav-control" href='#'><i class="fa fa-bars"></i></a></h1>
+
+<div class="side-nav">
+    <div class="d-flex flex-column flex-shrink-0 bg-dark">
+        <h1><a class="side-nav-control d-block p-3 mx-auto" href='#'><i class="fa fa-bars"></i></a></h1>
+        <h1><a class="d-block p-3 mx-auto" href='{{url_for("dashboard")}}'><i class="fa fa-home"></i></a></h1>
+        <h1><a class="d-block p-3 mx-auto" href='{{url_for("profile", user=g.user[0])}}'><i class="fa fa-user"></i></a></h1>
+        <h1><a class="d-block p-3 mx-auto" href='{{url_for("options")}}'><i class="fa fa-gear"></i></a></h1>
+        <h1><a class="notification-control d-block p-3 mx-auto" href='#'><i class="fa fa-bell"></i></a></h1>
+    </div>
+</div>
+
 <div class="notification-box">
     {% for notification in notifications %}
         <div class="notification card {{notification[0]}}">
@@ -167,8 +180,10 @@
     }
 
     function Show_Post_Creator() {
-        var post_creator = document.getElementsByClassName("create-post")[0];
-        post_creator.classList.toggle('hidden');
+        if (this.disabled == undefined) {
+            var post_creator = document.getElementsByClassName("create-post")[0];
+            post_creator.classList.toggle('hidden');
+        }
     }
 
     // Updating post likes
@@ -246,7 +261,7 @@
         var user = "{{g.user}}";
         if (user == "None") {
             Display_Overlay();
-        } else {
+        } else if (this.disabled == false) {
             // Minimise all the other editors
             let all_editors = document.getElementsByClassName("reply-row");
             for (let i = 0; i < all_editors.length; i++) {
@@ -404,6 +419,10 @@
             url: "{{url_for('destroy_notification')}}"
         })
         e.preventDefault()
+    })
+
+    $('.side-nav-control').on("click", function(e) {
+        $('.side-nav').toggleClass('shown')
     })
 
 </script>

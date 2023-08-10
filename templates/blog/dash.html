@@ -52,7 +52,7 @@
 
         <div class="card-body justify-content-center d-flex">
 
-            <form method="post" action="{{ url_for('auth.register') }}" autocomplete="off">
+            <form method="post" action="{{ url_for('auth.register') }}" autocomplete="off" id="register-form">
 
                 <div class="row">
                     <div class="col-4">
@@ -86,6 +86,8 @@
                 <p class="feedback-message feedback-hidden" id="password-feedback" >
                     Password must be least <span class="feedback-message password-feedback">8 characters</span>, including at least <span class="feedback-message password-feedback">one capital letter</span>, and <span class="feedback-message password-feedback">one number</span>
                 </p>
+
+                <p id="error"></p>
 
                 <input class="mx-auto d-flex align-middle" type="submit" value="Let's go!">
             </form>
@@ -264,6 +266,25 @@
         }
         );
     });
+
+    $('#register-form').on("submit", function(e) {
+        let form_data = $(this).serialize()
+        $.ajax({
+            data: form_data,
+            type: "POST",
+            url: this.action
+        })
+        .done(
+            function(data){
+                if (data.error == "none") {
+                    window.location.reload()
+                } else {
+                    $('#error').html(data.error)
+                }
+            }
+        )
+        e.preventDefault()
+    })
     </script>
 {% endblock %}
 </html>

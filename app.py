@@ -19,6 +19,8 @@ from flask import (
 
 import re, os, markupsafe, datetime, random
 
+from better_profanity import profanity
+
 import auth #type: ignore
 from db import get_db #type: ignore
 from emailer import send_email #type:ignore
@@ -49,15 +51,6 @@ wsgi_app = app.wsgi_app
 
 # Blueprint for authentication functions
 app.register_blueprint(auth.bp)
-
-def readProfanities():
-    profanities = []
-    file = open('./static/profanity-list.txt','r')
-    for line in file:
-        line = line.strip()
-    return profanities
-  
-PROFANITIES = readProfanities()
 
 def get_current_time():
     """ Returns the current datetime formatted for MySQL """
@@ -281,9 +274,11 @@ def add_likes():
 
 @app.route("/create_post", methods=["GET", "POST"])
 def create_post():
-    print('A POST MIGHT BE BEING MADE')
     if request.method == "POST":
-        print('A POST IS BEING MADE')
+
+        if not g.user[6]:
+            return jsonify({'error': "email not confirmed"})
+
         content = request.form["post_content"]
         reply_id = request.form["reply_id"]
         if reply_id == '0': reply_id = None
@@ -311,6 +306,7 @@ def create_post():
         else:
             cursor = db.cursor()
             now = datetime.datetime.now()
+            content = profanity.censor(content)
             cursor.execute(
                 " INSERT INTO tblpost (user_id, date, time, content, reply_id) VALUES (%s, %s, %s, %s, %s)",
                 (g.user[0], now.date(), now.time(), content, reply_id)
@@ -452,6 +448,9 @@ def fetch_conversations():
 def create_conversation():
     db = get_db()
 
+    if not g.user[6]:
+        return jsonify({'success': False})
+
     recipitent_id = request.form['recipitent_id']
     convo_type = request.form['type']
 
@@ -521,6 +520,9 @@ def create_conversation():
 
 @app.route('/send_message', methods=["POST"])
 def send_message():
+    if not g.user[6]:
+        return jsonify({'html': "nice try"})
+
     message_body = request.form['message_body']
     convo_id = request.form['convo_id']
 
@@ -528,6 +530,7 @@ def send_message():
 
     db = get_db()
     with db.cursor() as cursor:
+        message_body = profanity.censor(message_body)
         cursor.execute("INSERT INTO tblmessages (sender_id, convo_id, message, timestamp) VALUES (%s, %s, %s, %s)", (g.user[0], convo_id, message_body, timestamp))
         db.commit()
 
@@ -557,6 +560,7 @@ def update_post():
 
     db = get_db()
     with db.cursor() as cursor:
+        content = profanity.censor(content)
         cursor.execute(sql, (content, post_id))
 
     db.commit()
@@ -700,17 +704,13 @@ def confirm_email():
     db = get_db()
     if g.user is None: 
         return redirect(url_for('dashboard'))
-    
+
     with db.cursor() as cursor:
         cursor.execute("UPDATE tblusers SET `confirmed`=1 WHERE email = %s", (g.user[3]))
         db.commit()
 
     return redirect(url_for('dashboard'))
 
-def profanity_check(txt):
-    pass
-
-    
 if __name__ == '__main__':
     import os
     HOST = os.environ.get('SERVER_HOST', 'localhost')

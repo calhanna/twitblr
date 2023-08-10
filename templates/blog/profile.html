@@ -34,7 +34,7 @@
     <div class="side-nav">
     <!-- Navigation Buttons -->
     {% if user == g.user[0] %}
-        <a class="nav-button" href="#" onclick="Show_Post_Creator()">Create Post</a>
+        <a class="nav-button" href="#" onclick="Show_Post_Creator()" {% if not g.user[6] %}disabled{%endif%}>Create Post</a>
         <br>
     {% endif %}
     <a class="nav-button" href="{{url_for('dashboard')}}">Dashboard</a>
@@ -52,7 +52,7 @@
                         </div>
                         <div class="col-10 my-auto">
                             <h1 class="profile-title"> {{user_info[1] }}'s Profile</h1>
-                            {% if g.user[0] != user %}
+                            {% if g.user[0] != user and g.user[6] %}
                                 <button class="banner-button" id="message-button"> Message </button>
                                 <button class="banner-button report-button"> Report </button>
                             {% endif %}
@@ -284,6 +284,7 @@
             type: 'Direct'
         }, function(result) {
             if (result['success']) {
+                /*
                 $('#message-col').children().first().prepend(result['html'])
                 new_element = $(result['html'])
                 console.log(new_element.find(".convo-submit"))
@@ -299,6 +300,8 @@
                         $(this).children().last().click()
                     }
                 });
+                */
+                window.location.reload()
             }
         })
     })

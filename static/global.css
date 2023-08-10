@@ -88,23 +88,6 @@ body {
     margin-bottom:0;
 }
 
-.side-nav {
-    /* padding: 2px; */
-    /* background-color: white; */
-    border-radius: 10px;
-    /* padding: 2rem; */
-    /* border: gray; */
-    /* border-style: solid; */
-    border-width: 1px;
-    overflow: hidden;
-    left: 0px;
-    position: relative;
-    margin-top:1rem;
-    float: right;
-    display: grid;
-    min-width:100%;
-}
-
 .nav-button {
 	width: 12rem;
     margin: 0px;
@@ -211,7 +194,6 @@ body {
 
 .message-col {
     margin-top:2em;
-    height:100vw;
 }
 
 .convo-body {
@@ -270,47 +252,6 @@ body {
 
 .fa-trash-o {
     color:red;
-}
-
-@media(max-width:767px){
-    .prof-card {
-        position:absolute;
-        top:0;
-        min-width:100%;
-    }
-
-    #nav-col {
-        display:none;
-    }
-
-    .col-9 {
-        width:100%;
-        
-    }
-
-    .container {
-        width:100% !important;
-        min-width: 100% !important;
-        display:block;
-        padding:0;
-    }
-
-    .container-fluid {
-        padding:0 !important;
-    }
-
-    .post-container {
-        position:static;
-        width: 100% !important;
-        padding:0.25rem !important
-    }
-    .jumbotron {
-        padding: 0.5rem !important
-    }
-
-    .message-col {
-        display:none;
-    }
 }
 
 .pfp-container {
@@ -511,6 +452,38 @@ a {
     animation-duration: 1s;
 }
 
+.side-nav-control {
+    display: none;
+}
+
+.side-nav {
+    max-width:0px;
+    overflow:hidden;
+    position:fixed;
+}
+
+.side-nav.shown {
+    max-width: unset;
+    overflow: auto;
+    z-index: 1;
+    top: 0;
+    min-height: 100%;
+}
+
+.side-nav.shown .flex-column {
+    min-height: 100%;
+    width: 4.5rem;
+    position: fixed;
+}
+
+.side-nav .side-nav-control {
+    position: static;
+}
+
+.side-nav h1 {
+    text-align: center;
+}
+
 @keyframes spin {
     0% {
         transform:rotate(0deg);
@@ -518,5 +491,60 @@ a {
 
     100% {
         transform:rotate(360deg);
+    }
+}
+
+@media(max-width:767px){
+    .side-nav-control {
+        position:fixed;
+        left: 0.5em;
+        top: 0.5em;
+        display:block;
+        z-index: 1;
+        background-color: rgba(30,30,30,0.1);
+        cursor: pointer;
+    }
+
+    #options-gear {
+        display:none
+    }
+
+    .prof-card {
+        position:absolute;
+        top:0;
+        min-width:100%;
+    }
+
+    #nav-col {
+        display:none;
+    }
+
+    .col-9 {
+        width:100%;
+        
+    }
+
+    .container {
+        width:100% !important;
+        min-width: 100% !important;
+        display:block;
+        padding:0;
+    }
+
+    .container-fluid {
+        padding:0 !important;
+    }
+
+    .post-container {
+        position:static;
+        width: 100% !important;
+        padding:0.25rem !important
+    }
+    .jumbotron {
+        padding: 0.5rem !important
+    }
+
+    .message-col {
+        display:none;
     }
 }

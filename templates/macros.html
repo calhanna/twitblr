@@ -35,12 +35,14 @@
                 <div>
                     <p class="card-text">{{ post[4] |safe}}</p>
                 </div>
-                <a 
-                    onclick="Show_Reply_Creator(this)"
-                    class="action-link {{post[0]}}"
-                >
-                    <i class="fa fa-reply" aria-hidden="true"></i>
-                </a>
+                {% if g.user[6] %}
+                    <a 
+                        onclick="Show_Reply_Creator(this)"
+                        class="action-link {{post[0]}}"
+                    >
+                        <i class="fa fa-reply" aria-hidden="true"></i>
+                    </a>
+                {% endif %}
                 <a 
                     href="#" 
                     class="action-link {{post[0]}} like-button {% if post[0] in activated_posts[0]%}activated{% endif %}"
@@ -88,12 +90,14 @@
                 </div>
                 
                 <!-- Reply Button-->
-                <a 
-                    onclick="Show_Reply_Creator(this)"
-                    class="action-link {{reply[0]}}"
-                >
-                    <i class="fa fa-reply" aria-hidden="true"></i>
-                </a>
+                {% if g.user[6] %}
+                    <a 
+                        onclick="Show_Reply_Creator(this)"
+                        class="action-link {{reply[0]}}"
+                    >
+                        <i class="fa fa-reply" aria-hidden="true"></i>
+                    </a>
+                {% endif %}
                 
                 <!-- Like button. Requires a lot of post information -->
                 <a 

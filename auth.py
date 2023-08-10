@@ -7,6 +7,7 @@ import hashlib
 
 from db import get_db #type:ignore
 from emailer import send_email as send_message #type:ignore
+import app #type:ignore
 
 CONFIRM_MESSAGE = """\
     <style>
@@ -113,14 +114,12 @@ def register():
                 session.clear()
                 session['user_id'] = user[0]
                 send_message(email, "Confirm your email", CONFIRM_MESSAGE % (username, url_for('confirm_email', _external=True)))
+                return jsonify({'error': 'none'})
             except db.IntegrityError as e:
                 # According to flask docs this exception will catch when a username is taken. Doesn't work here because I don't use the username as the primary key.
-                print(e)
-            else:
-                return redirect(url_for('dashboard'))
-        flash(error)
-            
-
+                return jsonify({'error': e})
+        else:
+            return jsonify({'error': error})
 
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
@@ -209,4 +208,5 @@ def change_password(email):
 @bp.route('/confirm_email', methods=["POST"])
 def confirm_email():
     send_message(g.user[3], "Confirm your email", CONFIRM_MESSAGE % (g.user[1], url_for('confirm_email', _external=True)))
+    app.send_notification(g.user, "Confirmation email sent! ")
     return jsonify({})
