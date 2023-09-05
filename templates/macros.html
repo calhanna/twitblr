@@ -16,7 +16,7 @@
                     <span class="ql-formats">
                         <select class="ql-align"></select>
                     </span>
-                    <input id="post-submit" type="submit" value="Create Post">
+                    <button id="post-submit" class="fa fa-reply" type="submit"></button>
                 </div>
             </form>
         </div>
@@ -57,7 +57,7 @@
                 </a>
 
                 {% if post[-1]|length > 0 %}
-                <button onclick="Show_Replies({{post[0]}})">Show {{ post[-1]|length }} Replies </button>
+                <button onclick="Show_Replies({{post[0]}})" class="fa fa-chevron-down"></button>
                 {% endif %}
 
                 {% if g.user[5] == '1' %}

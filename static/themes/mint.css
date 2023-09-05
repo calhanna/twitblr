@@ -7,6 +7,10 @@
     color: 	rgb(90,161,127);
 }
 
+a:hover, .action-link:hover, .action-link:hover .fa, .btn:hover .fa, .fa:hover{
+    color: rgb(120, 191, 157);
+}
+
 .ql-stroke {
     stroke: rgb(90,161,127) !important;
 }

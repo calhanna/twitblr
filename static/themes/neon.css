@@ -15,7 +15,7 @@
     fill: white !important
 }
 
-.activated, .activated .fa {
+.activated, .activated .fa, a:hover, .action-link:hover, .action-link:hover .fa, .btn:hover .fa, .fa:hover {
     color: rgb(187, 134, 252) !important;
 }
 

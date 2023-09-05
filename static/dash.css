@@ -12,6 +12,12 @@
     width: 43.55rem;
 }
 
+button.fa-search {
+    border: none;
+    background-color: transparent;
+    font-size:x-large;
+}
+
 .search-form input[type="text"] {
     width: 80%;
 }

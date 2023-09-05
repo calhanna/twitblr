@@ -3,7 +3,7 @@ import functools, re, sys
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify
 )
-import hashlib
+import hashlib, threading
 
 from db import get_db #type:ignore
 from emailer import send_email as send_message #type:ignore
@@ -113,7 +113,8 @@ def register():
                 user = cursor.fetchone()
                 session.clear()
                 session['user_id'] = user[0]
-                send_message(email, "Confirm your email", CONFIRM_MESSAGE % (username, url_for('confirm_email', _external=True)))
+                email_thread = threading.Thread(target=send_message, args=(email, "Confirm your email", CONFIRM_MESSAGE % (username, url_for('confirm_email', _external=True))))
+                email_thread.start()
                 return jsonify({'error': 'none'})
             except db.IntegrityError as e:
                 # According to flask docs this exception will catch when a username is taken. Doesn't work here because I don't use the username as the primary key.
@@ -155,15 +156,16 @@ def sign_out():
 @bp.before_app_request
 def load_logged_in_user():
     user_id = session.get('user_id')
+    db = get_db()
 
     if user_id is None:
         g.user = None
     else:
-        cursor = get_db().cursor()
-        cursor.execute(
-            'SELECT * FROM tblusers WHERE id = %s', (user_id,)
-        )
-        g.user = cursor.fetchone()
+        with db.cursor() as cursor:
+            cursor.execute(
+                'SELECT * FROM tblusers WHERE id = %s', (user_id,)
+            )
+            g.user = cursor.fetchone()
 
 @bp.route('/change_password/<email>', methods=["GET", "POST"])
 def change_password(email):

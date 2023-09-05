@@ -1,6 +1,19 @@
+body {
+    color:white;
+}
+
+p {
+    color:white;
+}
+
 .card, .prof-card, .nav-button, .ql-picker-options {
     background-color: rgb(50, 50, 50) !important;
     border-color: rgb(25,25,25)
+}
+
+.btn-primary:hover {
+    background-color: rgb(107, 54, 172);
+    color: white !important;
 }
 
 .card-title, .fa, .card-body, .action-link, .nav-button, .ql-toolbar span, .notification {
@@ -15,8 +28,9 @@
     fill: white !important
 }
 
-.activated, .activated .fa {
+.activated, .activated .fa, a:hover, .action-link:hover, .action-link:hover .fa, .btn:hover .fa, .fa:hover {
     color: rgb(187, 134, 252) !important;
+    transition: 0.5s;
 }
 
 .dm-header, .dm-card .col-2, .convo-title, .btn-primary, #post-body, .ql-toolbar, .ql-container {

@@ -70,7 +70,7 @@
                     <div class="row">
                         <div class="col-2">
                             {% for conversation in conversations %}
-                                <button class="dm-button" data-convo_child_id="{{conversation[0][0]}}">
+                                <button class="dm-button mx-auto" data-convo_child_id="{{conversation[0][0]}}">
                                     {# This line is rather hellish but what it does is display the profile picture of the member of the conversation that is not the current user.#}
                                     {# or, in other words, the one you're messaging. #}
                                     {# The reason it's so horrible is that I started writing this as a one line thing #}
@@ -122,13 +122,17 @@
 
 <h1><a class="side-nav-control" href='#'><i class="fa fa-bars"></i></a></h1>
 
-<div class="side-nav">
-    <div class="d-flex flex-column flex-shrink-0 bg-dark">
+<div class="side-bar">
+    <div class="d-flex flex-column flex-shrink-0 bg-light">
         <h1><a class="side-nav-control d-block p-3 mx-auto" href='#'><i class="fa fa-bars"></i></a></h1>
-        <h1><a class="d-block p-3 mx-auto" href='{{url_for("dashboard")}}'><i class="fa fa-home"></i></a></h1>
-        <h1><a class="d-block p-3 mx-auto" href='{{url_for("profile", user=g.user[0])}}'><i class="fa fa-user"></i></a></h1>
-        <h1><a class="d-block p-3 mx-auto" href='{{url_for("options")}}'><i class="fa fa-gear"></i></a></h1>
-        <h1><a class="notification-control d-block p-3 mx-auto" href='#'><i class="fa fa-bell"></i></a></h1>
+        {% if g.user != None %}
+            <h1><a class="d-block p-3 mx-auto" href='{{url_for("dashboard")}}'><i class="fa fa-home"></i></a></h1>
+            <h1><a class="d-block p-3 mx-auto" href='{{url_for("profile", user=g.user[0])}}'><i class="fa fa-user"></i></a></h1>
+            <h1><a class="d-block p-3 mx-auto" href='{{url_for("options")}}'><i class="fa fa-gear"></i></a></h1>
+            <h1><a class="notification-control d-block p-3 mx-auto" href='#'><i class="fa fa-bell"></i></a></h1>
+        {% else%}
+            <h1><a class="d-block p-3 mx-auto" onclick="Display_Overlay()"><i class="fa fa-sign-in"></i></a></h1>
+        {% endif %}
     </div>
 </div>
 
@@ -147,6 +151,43 @@
     // Base scripts for the whole website. Would be nice to have this in an actual js file but that would require a lot of finicking to work with jinja variables so its really not worth it
 
     // Initialise Quill
+
+    class Counter {
+        constructor(quill, options) {
+          this.quill = quill;
+          this.options = options;
+          this.container = document.querySelector(options.container);
+          quill.on('text-change', this.update.bind(this));
+          this.update();  // Account for initial contents
+        }
+      
+        calculate() {
+          let text = this.quill.getText().trim();
+          if (this.options.unit === 'word') {
+            text = text.trim();
+            // Splitting empty text returns a non-empty array
+            return text.length > 0 ? text.split(/\s+/).length : 0;
+          } else {
+            return text.length;
+          }
+        }
+        
+        update() {
+          var length = this.calculate();
+          var label = this.options.unit;
+          if (length !== 1) {
+            label += 's';
+          }
+          this.container.innerText = length;
+          if (length > 255) {
+              this.container.style.color = 'red'
+          } else {
+              this.container.style.color = 'green'
+          }
+        }
+    }
+
+    Quill.register('modules/counter', Counter);
 
     var BackgroundClass = Quill.import('attributors/class/background');
     var ColorClass = Quill.import('attributors/class/color');
@@ -245,8 +286,11 @@
         post_body.style.height = "";
         post_body.style.height = post_body.scrollHeight + 3 + "px";
 
+        var counter = document.getElementById('counter')
+
         // Check character count, update counter
         var length = post_body.innerText.length;
+        console.log(length)
         document.getElementById('counter').innerHTML = length + '/255';
         if (length > 255 || length == 0) {
             counter.style.color = 'red';
@@ -261,7 +305,7 @@
         var user = "{{g.user}}";
         if (user == "None") {
             Display_Overlay();
-        } else if (this.disabled == false) {
+        } else if (this.disabled != true) {
             // Minimise all the other editors
             let all_editors = document.getElementsByClassName("reply-row");
             for (let i = 0; i < all_editors.length; i++) {
@@ -422,7 +466,7 @@
     })
 
     $('.side-nav-control').on("click", function(e) {
-        $('.side-nav').toggleClass('shown')
+        $('.side-bar').toggleClass('shown')
     })
 
 </script>

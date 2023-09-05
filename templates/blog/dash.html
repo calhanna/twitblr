@@ -116,6 +116,7 @@
     <!--
     <a class="nav-button" href="{{url_for('create_post', reply_id=0)}}">Create Post</a>
     -->
+    {% if g.user != None %} <a class="nav-button" href="{{url_for('profile', user=g.user[0])}}?post-create=1">Create Post</a>{% endif %}
     </div>
 {% endblock %}
 
@@ -125,7 +126,7 @@
             <div class="card mx-auto search-card">
                 <form class="search-form" action={{url_for("search")}} method="POST">
                     <input type="text" name="query">
-                    <input type="submit">
+                    <button type="submit" class="fa fa-search"></button>
                 </form>
             </div>
         </div>
@@ -177,13 +178,27 @@
         }
     }
 
+    var username_list
     function Validate_Username() {
         // Check username against list of used names, provided through Jinja. Also make sure there is a username
-
-        var username_list = eval('{{username_list|tojson}}');
         var username = document.getElementById('username')
         var feedback = document.getElementById("username-feedback")
-        
+
+        if ((username_list in window) == false) {
+            $.ajax(
+                {
+                    data: {},
+                    url: "{{url_for('get_username_list')}}",
+                    type: "POST"
+                }
+            ).done(
+                function(result) {
+                    username_list = eval(result.username_list)
+                    console.log(username_list)
+                }
+            )
+        }
+
         if (username.value.length == 0) {
             feedback.style.color = "red";
             feedback.innerHTML = "Please fill out this field"
@@ -237,6 +252,18 @@
     }
 
     $(document).ready(function() {
+
+        $.ajax(
+            {
+                data: {},
+                url: "{{url_for('get_username_list')}}",
+                type: "POST"
+            }
+        ).done(
+            function(result) {
+                var username_list = eval(result.username_list)
+            }
+        )
 
         // Authentication JS
         $('#login').on('submit',function(e){

@@ -70,7 +70,7 @@
                         <form class="post-body" id="post-creation-form" method="POST" action="javascript:void(0);">
 
                             <!-- Quill Editor -->
-                            <div onkeydown='ValidatePost()' id="post-body" name="postContent" required></div>
+                            <div id="post-body" name="postContent" required></div>
                             <div id="toolbar">
                                 <span class="ql-formats">
                                     <button class="ql-bold"></button>
@@ -92,7 +92,7 @@
                                 <span class="ql-formats">
                                     <button class="ql-image"></button>
                                 </span>
-                                <input id="post-submit" onclick="SubmitForm()" type="submit" value="Create Post">
+                                <button id="post-submit" class="fa fa-chevron-right" onclick="SubmitForm()" type="submit"></button>
                                 <span id="counter" style="color:green">0/255</span> 
                                 <span id="flashed-error"></span>
                             </div>
@@ -161,7 +161,7 @@
                                     <!-- Quill Editor -->
                                     <div oninput="ValidatePost()" id="edit-post-body{{post[0]}}" name="postContent" required> {{ post[4] |safe}} </div>
                                     <div id="edit-toolbar{{post[0]}}">
-                                        <span id="counter" style="color:green">0/255</span> 
+                                        <span id="counter" style="color:green"></span> 
                                         <span class="ql-formats">
                                             <button class="ql-bold"></button>
                                             <button class="ql-italic"></button>
@@ -198,7 +198,10 @@
 <script>
 
     var editor = new Quill('#post-body', {
-        modules: { toolbar: '#toolbar' },
+        modules: { toolbar: '#toolbar', counter: {
+            container: '#counter',
+            unit: ''
+        }},
         theme: 'snow',
     });
 
@@ -207,6 +210,8 @@
     $('#post-creation-form').submit(function(e) {
         let post_body = editor.root.innerHTML;
         let pure_text = editor.root.innerText;
+
+        $('#post-submit').prop('disabled', true)
 
         if (pure_text.length > 0) {
             $.ajax(
@@ -235,6 +240,12 @@
         $('#pfp-chooser').on('change', function() {
             document.getElementById('pfp-form').submit();
         });
+        
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        if (urlParams.get('post-create') == 1) {
+            Show_Post_Creator()
+        }
     });
 
     $('.edit-button').on('click', function() {
@@ -279,6 +290,7 @@
     }
 
     $("#message-button").on('click', function() {
+        this.disabled = true;
         $.post('{{url_for("create_conversation")}}', {
             recipitent_id: parseInt("{{user}}"),
             type: 'Direct'

@@ -5,6 +5,7 @@ It contains the definition of routes and views for the application.
 
 from concurrent.futures import process
 from email.policy import default
+import threading
 from flask import (
     Flask, 
     render_template, 
@@ -63,6 +64,8 @@ def index():
     Startup
     Renders either welcome page or dashboard
     """
+
+    print(url_for('auth.change_password', email="calhanna@student.pakuranga.school.nz"))
 
     db = get_db()
     if db.cursor() == False:
@@ -406,6 +409,16 @@ def fetch_conversations():
 
     db = get_db()
 
+    # Step 0: Remove conversations with only one user
+    with db.cursor() as cursor:
+        cursor.execute("""
+        DELETE FROM
+            tblconversations 
+        WHERE
+            convo_id IN ( SELECT convo_id FROM ( SELECT convo_id, COUNT(*) AS user_count FROM tblconvo_users GROUP BY convo_id ) AS a WHERE user_count <= 1 );
+        """)
+        db.commit()
+
     # Step 1: fetch conversations
     with db.cursor() as cursor:
         cursor.execute(
@@ -436,6 +449,7 @@ def fetch_conversations():
     # Step 4: Add participants to data structure
     conversations = [list(x) for x in conversations]
     for conversation in conversations:
+        print(len(conversation))
         with db.cursor() as cursor:
             cursor.execute("SELECT * FROM tblusers WHERE tblusers.id IN (SELECT user_id FROM tblconvo_users WHERE convo_id = %s )", [conversation[0][0]])
             conversation.append(cursor.fetchall())
@@ -567,6 +581,16 @@ def update_post():
 
     return jsonify({'content':content})
 
+@app.route('/get_username_list', methods=["POST"])
+def get_username_list():
+    db = get_db()
+    with db.cursor() as cursor:
+        cursor.execute(
+            "SELECT username FROM tblusers"
+        )
+        username_list = [x[0] for x in cursor.fetchall()]
+        return jsonify({'username_list': str(username_list)})
+
 @app.route('/search', methods=["GET", "POST"])
 def search():
     db = get_db()
@@ -577,7 +601,11 @@ def search():
         users = cursor.fetchall()
         username_list = [user[1] for user in users]
 
-    query = "%{0}%".format(request.form['query'])
+    try:
+        query = "%{0}%".format(request.form['query'])
+    except KeyError:
+        # I don't know how this happens, and I don't want to know.
+        return redirect(url_for('dashboard'))
 
     print('SELECT * FROM tblpost WHERE content like "%%%s%%";' % (query))
 
@@ -600,7 +628,7 @@ def search():
 
             post.append(replies)
 
-    return render_template('/search.html', posts=posts, username_list = username_list, activated_posts=check_user_likes())
+    return render_template('/search.html', posts=posts, activated_posts=check_user_likes())
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ["png", "jpg", "jpeg", "jfif", "webp"]
@@ -608,6 +636,9 @@ def allowed_file(filename):
 @app.route('/options', methods=["GET", "POST"])
 def options():
     """ Manages user options, checking against the default values and saving to tblsettings """
+
+    if g.user is None:
+        return redirect(url_for('dashboard'))
 
     db = get_db()
     if request.method == "POST":
@@ -677,7 +708,9 @@ def send_notification(user, message):
     with db.cursor() as cursor:
         cursor.execute("INSERT INTO tblnotifications (user_id, message) VALUES (%s, %s)", (user[0], message))
         db.commit()
-    send_email(user[3], message, message)
+
+    em_thread = threading.Thread(target=send_email, args=(user[3], "New notification from Twitblr", message))
+    em_thread.start()
 
 @app.route('/destroy_notification', methods=["POST"])
 def destroy_notification():

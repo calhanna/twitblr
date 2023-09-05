@@ -12,6 +12,21 @@
     display: inline;
 }
 
+input[type="color"] {
+    border: none;
+    background-color: gray;
+    border-radius: 3px;
+    padding: 1px;
+    width: 2em;
+    height: 2em;
+}
+
+.password-changer {
+    border: 2px solid gray;
+    border-radius: 5px;
+    font-weight: 200;
+}
+
 .option-card .card-title {
     border-bottom: 1px solid rgba(25,25,25,0.25);
     padding: 0.5rem;
@@ -57,27 +72,27 @@ input[value="neon"] {
 }
 
 input[value="galaxy.jpg"] {
-    background-image: url('assets/backgrounds/galaxy.jpg')
+    background-image: url('assets/backgrounds/galaxy-preview.jpg')
 }
 
 input[value="jelly.jpg"] {
-    background-image: url('assets/backgrounds/jelly.jpg')
+    background-image: url('assets/backgrounds/jelly-preview.jpg')
 }
 
 input[value="kitty.jpg"] {
-    background-image: url('assets/backgrounds/kitty.jpg')
+    background-image: url('assets/backgrounds/kitty-preview.jpg')
 }
 
 input[value="lightning.jpg"] {
-    background-image: url('assets/backgrounds/lightning.jpg')
+    background-image: url('assets/backgrounds/lightning-preview.jpg')
 }
 
 input[value="lounge.jpg"] {
-    background-image: url('assets/backgrounds/lounge.jpg')
+    background-image: url('assets/backgrounds/lounge-preview.jpg')
 }
 
 input[value="vaporwave.jpg"] {
-    background-image: url('assets/backgrounds/vaporwave.jpg')
+    background-image: url('assets/backgrounds/vaporwave-preview.jpg')
 }
 
 .option-card .row {
