@@ -148,7 +148,6 @@
 
                                     {% if g.user[0] == user %}
                                         <a 
-                                            href="#"
                                             class="action-link {{post[0]}} edit-button"
                                         >
                                             <i class="fa fa-edit" aria-hidden="true"></i>
@@ -171,7 +170,7 @@
                                         <span class="ql-formats">
                                             <select class="ql-align"></select>
                                         </span>
-                                        <input id="post-submit{{post[0]}}" class="{{post[0]}}" onclick="SubmitEdits(this)" type="submit" value="Create Post">
+                                        <button id="post-submit{{post[0]}}" class="{{post[0]}} fa fa-pencil" onclick="SubmitEdits(this)" type="submit"></button>
                                     </div>
                                 </form>
                             </div>
@@ -213,27 +212,23 @@
 
         $('#post-submit').prop('disabled', true)
 
-        if (pure_text.length > 0) {
-            $.ajax(
-                {
-                    data:{post_content: post_body, reply_id: 0, stripped_content: pure_text},
-                    type: 'POST',
-                    url:"{{url_for('create_post')}}"
+        $.ajax(
+            {
+                data:{post_content: post_body, reply_id: 0, stripped_content: pure_text},
+                type: 'POST',
+                url:"{{url_for('create_post')}}"
+            }
+        )
+        .done(
+            function(result){
+                if (result.error == null) {
+                    $('#post-submit').prop('disabled', true)
+                    location.reload();
+                } else {
+                    document.getElementById('flashed-error').innerHTML = result.error;
                 }
-            )
-            .done(
-                function(result){
-                    if (result.error == null) {
-                        location.reload();
-                    } else {
-                        document.getElementById('flashed-error').innerHTML = result.error;
-                    }
-                }
-            )
-        } else {
-            e.preventDefault()
-            console.log('post creation blocked')
-        }
+            }
+        )
     });
 
     $(document).ready(function() {

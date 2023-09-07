@@ -10,6 +10,10 @@
 .profile-title {
 }
 
+.fa-pencil {
+    float: right !important;
+}
+
 .banner-button {
     border-radius:10px;
     background-color: blue;

@@ -19,10 +19,16 @@ button.fa-chevron-down {
     animation-name: spin;
     animation-duration:2s;
     cursor:pointer;
+    animation-delay:0s;
+    animation-iteration-count: infinite;
 }
 
 #options-gear .fa-gear{
     font-size: xx-large;
+    animation-name: spin;
+    animation-iteration-count: 1;
+    animation-duration: 2s;
+    animation-delay:5s;
 }
 
 .pfp {

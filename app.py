@@ -5,7 +5,7 @@ It contains the definition of routes and views for the application.
 
 from concurrent.futures import process
 from email.policy import default
-import threading
+import threading, base64
 from flask import (
     Flask, 
     render_template, 
@@ -278,44 +278,36 @@ def add_likes():
 @app.route("/create_post", methods=["GET", "POST"])
 def create_post():
     if request.method == "POST":
+        print('e')
 
         if not g.user[6]:
             return jsonify({'error': "email not confirmed"})
 
         content = request.form["post_content"]
+        stripped_content = request.form["stripped_content"].strip().strip('\n')
         reply_id = request.form["reply_id"]
         if reply_id == '0': reply_id = None
 
         db = get_db()
 
-        # Image handling
-
-        # CURRENTLY THIS DOES NOTHING.
-        # Right now, we just put straight Base64 data in the database. This is horrible and unsustainable
-        # We will burn through storage space like wildfire
-        # Eventually I will fix this by encoding the base 64 to a file, which i will then link to
-        # but first i need to figure out how to refer to such a file in jinja 
-        
-        # Step 1: Find all <img> tags, and get whats in the middle
-        regex = re.compile(r'<img (.*?)>', re.IGNORECASE | re.MULTILINE)
-        image_srcs = re.findall(regex, content)
-
-        # Step 2: Purge the base64 data
-
         error = None
         
-        if not request.form["stripped_content"].strip().strip('\n'):
+        print(content.strip().strip('\n').replace('<p>', '').replace('<br>','').replace('</p>', ''))
+        if not content.strip().strip('\n').replace('<p>', '').replace('<br>','').replace('</p>', ''):
             error = "Post body required"
+        elif len(stripped_content) > 255:
+            error = "Post length over limit"
         else:
             cursor = db.cursor()
             now = datetime.datetime.now()
-            content = profanity.censor(content)
+            #censored_content = profanity.censor(stripped_content)
+
             cursor.execute(
                 " INSERT INTO tblpost (user_id, date, time, content, reply_id) VALUES (%s, %s, %s, %s, %s)",
                 (g.user[0], now.date(), now.time(), content, reply_id)
                 )
             db.commit()
-        print(error)
+            print('done')
 
         return jsonify({'error': error})
 

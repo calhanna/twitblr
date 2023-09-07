@@ -181,8 +181,10 @@
           this.container.innerText = length;
           if (length > 255) {
               this.container.style.color = 'red'
+              this.container.previousElementSibling.disabled = true
           } else {
               this.container.style.color = 'green'
+              this.container.previousElementSibling.disabled = false
           }
         }
     }
@@ -200,6 +202,7 @@
 
     // Preserve scroll position
     document.addEventListener("DOMContentLoaded", function(event) { 
+        console.log('?')
         var scrollpos = localStorage.getItem('scrollpos');
         if (scrollpos) window.scrollTo(0, scrollpos);
     });
@@ -292,7 +295,7 @@
         var length = post_body.innerText.length;
         console.log(length)
         document.getElementById('counter').innerHTML = length + '/255';
-        if (length > 255 || length == 0) {
+        if (length > 255) {
             counter.style.color = 'red';
             document.getElementById('post-submit').disabled=true;
         } else {
