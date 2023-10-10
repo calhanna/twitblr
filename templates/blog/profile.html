@@ -135,7 +135,7 @@
                                 </a>
 
                                 {% if post[-1]|length > 0 %}
-                                <button onclick="Show_Replies({{post[0]}})">Show {{ post[-1]|length }} Replies </button>
+                                <button onclick="Show_Replies({{post[0]}})" class="fa fa-chevron-down"></button>
                                 {% endif %}
                                 
                                 {% if g.user[0] == user or g.user[5] == '1' %}

@@ -11,6 +11,11 @@ p {
     border-color: rgb(25,25,25)
 }
 
+.bg-light {
+    --bs-bg-opacity: 1;
+    background-color: rgba(var(--bs-dark-rgb),var(--bs-bg-opacity))!important;
+}
+
 .btn-primary:hover {
     background-color: rgb(107, 54, 172);
     color: white !important;
