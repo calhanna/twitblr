@@ -3,12 +3,29 @@
     border-color: rgb(0,48,32)
 }
 
-.card-title, .fa, .card-body, .action-link, .nav-button, .ql-toolbar span, .notification{
+.card-title, .fa, .card-body, .action-link, .nav-button, .ql-toolbar span, .notification, .nav-button:hover{
     color: 	rgb(90,161,127);
 }
 
-a:hover, .action-link:hover, .action-link:hover .fa, .btn:hover .fa, .fa:hover{
+.ql-editor p {
+    color: white !important;
+}
+
+.ql-snow .ql-picker.ql-expanded .ql-picker-label{
+    color: 	rgb(90,161,127) !important;
+}
+
+.activated, .activated .fa, a:hover, .action-link:hover, .action-link:hover .fa, .btn:hover .fa, .fa:hover, [class^="ql"]:hover {
     color: rgb(120, 191, 157);
+}
+
+.btn-primary:hover, .btn-primary:active:hover, .btn-primary:active:hover {
+    background-color: rgb(19, 82, 68) !important;
+    color: white !important;
+}
+
+.btn-primary:active {
+    background-color: rgb(19,122,99) !important;
 }
 
 .ql-stroke {
@@ -19,7 +36,7 @@ a:hover, .action-link:hover, .action-link:hover .fa, .btn:hover .fa, .fa:hover{
     fill: rgb(90,161,127) !important
 }
 
-.activated, .activated .fa {
+.activated, .activated .fa, [class^="ql"]:hover, .fa-chevron-right:hover {
     color: rgb(19,122,99) !important;
 }
 
@@ -31,6 +48,32 @@ a:hover, .action-link:hover, .action-link:hover .fa, .btn:hover .fa, .fa:hover{
     background-color: rgb(19,122,99);
 }
 
+.nav-button:hover {
+    background-color: rgb(9, 51, 38) !important;
+}
+
 .btn-primary:active {
     background-color: rgb(19,122,99);
+}
+
+.active img{
+    border: 2px solid rgb(19,122,99) !important;
+}
+
+::selection {
+    background-color: rgb(19,122,99) !important;
+}
+
+textarea:focus, input:focus{
+    outline: solid 2px rgb(19,122,99) !important;
+    border-radius:3px;
+    box-shadow: none !important;
+}
+
+button[class^="ql"]:hover svg .ql-stroke, .ql-picker-item:hover svg .ql-stroke, .ql-picker-label:hover svg .ql-stroke {
+    stroke: rgb(19,122,99) !important;
+}
+
+button[class^="ql"]:hover svg .ql-fill {
+    fill: rgb(19,122,99) !important;
 }

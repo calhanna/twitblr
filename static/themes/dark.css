@@ -16,13 +16,21 @@ p {
     background-color: rgba(var(--bs-dark-rgb),var(--bs-bg-opacity))!important;
 }
 
-.btn-primary:hover {
-    background-color: rgb(107, 54, 172);
+.btn-primary:hover, .btn-primary:active:hover {
+    background-color: rgb(107, 54, 172) !important;
     color: white !important;
 }
 
 .card-title, .fa, .card-body, .action-link, .nav-button, .ql-toolbar span, .notification {
     color: white;
+}
+
+.active img{
+    border: 2px solid rgb(107, 54, 172) !important;
+}
+
+::selection {
+    background-color: rgb(107, 54, 172) !important;
 }
 
 .ql-stroke {
@@ -33,9 +41,23 @@ p {
     fill: white !important
 }
 
-.activated, .activated .fa, a:hover, .action-link:hover, .action-link:hover .fa, .btn:hover .fa, .fa:hover {
+textarea:focus, input:focus{
+    outline: solid 2px rgb(107, 54, 172) !important;
+    border-radius:3px;
+    box-shadow: none !important;
+}
+
+.activated, .activated .fa, a:hover, .action-link:hover, .action-link:hover .fa, .btn:hover .fa, .fa:hover, [class^="ql"]:hover {
     color: rgb(187, 134, 252) !important;
     transition: 0.5s;
+}
+
+button[class^="ql"]:hover svg .ql-stroke, .ql-picker-item:hover svg .ql-stroke, .ql-picker-label:hover svg .ql-stroke {
+    stroke: rgb(187, 134, 252) !important;
+}
+
+button[class^="ql"]:hover svg .ql-fill {
+    fill: rgb(187, 134, 252) !important;
 }
 
 .dm-header, .dm-card .col-2, .convo-title, .btn-primary, #post-body, .ql-toolbar, .ql-container {

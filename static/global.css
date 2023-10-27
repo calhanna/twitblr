@@ -119,6 +119,10 @@ button.fa-chevron-down {
     margin-left:auto;
 }
 
+[class^="ql-align-"] {
+    pointer-events: none !important;
+}
+
 .search-card {
     padding: 1em;
 }

@@ -3,24 +3,22 @@ This script runs the application using a development server.
 It contains the definition of routes and views for the application.
 """
 
-from concurrent.futures import process
-from email.policy import default
-import threading, base64
+import threading
 from flask import (
     Flask, 
     render_template, 
     request,
     redirect,
     url_for,
-    g,
     flash,
+    g,
     session,
     jsonify
     )
 
 import re, os, markupsafe, datetime, random
 
-from better_profanity import profanity
+from better_profanity import profanity 
 
 import auth #type: ignore
 from db import get_db #type: ignore
@@ -75,11 +73,11 @@ def index():
 
 @app.errorhandler(500)
 def page_not_found(e):
-    # note that we set the 404 status explicitly
     return render_template('oopsie.html'), 500
 
 @app.context_processor
 def inject():
+    """ Inserts additional data into every single page """
     return dict(conversations=fetch_conversations(), user_settings=get_user_settings(), notifications=get_notifications())
 
 def check_likes(cursor, post):
@@ -234,6 +232,7 @@ def add_likes():
 
     if request.method == 'POST':
         if g.user is None:
+            # If ur not signed in, go away
             return jsonify({
                 'success': False
             })
@@ -278,13 +277,12 @@ def add_likes():
 @app.route("/create_post", methods=["GET", "POST"])
 def create_post():
     if request.method == "POST":
-        print('e')
 
         if not g.user[6]:
             return jsonify({'error': "email not confirmed"})
 
         content = request.form["post_content"]
-        stripped_content = request.form["stripped_content"].strip().strip('\n')
+        stripped_content = request.form["stripped_content"].strip().strip('\n') # just the text
         reply_id = request.form["reply_id"]
         if reply_id == '0': reply_id = None
 
@@ -292,15 +290,13 @@ def create_post():
 
         error = None
         
-        print(content.strip().strip('\n').replace('<p>', '').replace('<br>','').replace('</p>', ''))
-        if not content.strip().strip('\n').replace('<p>', '').replace('<br>','').replace('</p>', ''):
-            error = "Post body required"
+        if not content.strip().strip('\n').replace('<p>', '').replace('<br>','').replace('</p>', ''):  # Remove html tags to count the actual post length
+            error = "Post body required" 
         elif len(stripped_content) > 255:
             error = "Post length over limit"
         else:
             cursor = db.cursor()
             now = datetime.datetime.now()
-            #censored_content = profanity.censor(stripped_content)
 
             cursor.execute(
                 " INSERT INTO tblpost (user_id, date, time, content, reply_id) VALUES (%s, %s, %s, %s, %s)",
@@ -354,7 +350,6 @@ def profile(user):
         post.append(replies)
 
     if request.method=="POST":
-        print('succesfully made it to upload process')
         # Upload user profile_picture
         file = request.files['pfp']
         # If the user does not select a file, the browser submits an
@@ -452,6 +447,8 @@ def fetch_conversations():
 
 @app.route('/create_conversation', methods=["POST"])
 def create_conversation():
+    """ Adds a new conversation to tblconversations and adds the appropriate users to tblconvo_users"""
+
     db = get_db()
 
     if not g.user[6]:
@@ -506,6 +503,7 @@ def create_conversation():
         cursor.execute("INSERT INTO tblconvo_users (user_id, convo_id) VALUES (%s, %s)", (int(recipitent_id), id_number))
         db.commit()
 
+    # We send this html back to the browser to display the new conversation without reloading
     html = """
     <div class="card"> 
         <div class="card-title convo-title">
@@ -526,6 +524,8 @@ def create_conversation():
 
 @app.route('/send_message', methods=["POST"])
 def send_message():
+    """ Creates new message in tblmessages with appropriate values """
+
     if not g.user[6]:
         return jsonify({'html': "nice try"})
 
@@ -599,8 +599,7 @@ def search():
         # I don't know how this happens, and I don't want to know.
         return redirect(url_for('dashboard'))
 
-    print('SELECT * FROM tblpost WHERE content like "%%%s%%";' % (query))
-
+    # This is almost the same as the dashboard post displaying code.
     with db.cursor() as cursor:
         cursor.execute(
             'SELECT * FROM tblpost WHERE content like "{0}";'.format(query)

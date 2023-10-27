@@ -34,7 +34,7 @@
     <div class="side-nav">
     <!-- Navigation Buttons -->
     {% if user == g.user[0] %}
-        <a class="nav-button" href="#" onclick="Show_Post_Creator()" {% if not g.user[6] %}disabled{%endif%}>Create Post</a>
+        <a class="nav-button" href="#" onclick="Show_Post_Creator()" {% if not g.user[6] %}disabled=true title='Confirm your email'{%endif%}>Create Post</a>
         <br>
     {% endif %}
     <a class="nav-button" href="{{url_for('dashboard')}}">Dashboard</a>
